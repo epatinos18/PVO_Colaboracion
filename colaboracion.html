@@ -1,0 +1,2512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Colaboración de Demanda · S&OP Comercial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* TOPTEC — manual de marca */
+  --graphite:#575756;      /* gris primario */
+  --graphite-2:#454544;
+  --steel:#0058A5;         /* azul secundario (principal) */
+  --steel-light:#4D86B9;
+  --clay:#0058A5;          /* azul — color de acción/marca */
+  --clay-light:#3F7AB0;
+  --clay-dark:#004A7D;
+  --yellow:#FFD500;
+  --yellow-dark:#CEA800;
+  --yellow-ink:#7A5F00;    /* texto legible sobre amarillo */
+  --red:#E30613;
+  --red-dark:#A81815;
+  --paper:#FFFFFF;
+  --paper-dim:#F2F2F1;
+  --line:#E2E1DE;
+  --ink:#2E2E2D;
+  --ink-dim:#8A8A88;
+  --good:#004A7D;
+  --good-bg:#E7F0F8;
+  --warn:#7A5F00;
+  --warn-bg:#FFF6CC;
+  --bad:#A81815;
+  --bad-bg:#FCE7E5;
+  --radius:6px;
+}
+*{box-sizing:border-box;}
+html{color-scheme:light;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Nunito Sans',system-ui,sans-serif;
+  font-size:14px;
+  line-height:1.45;
+}
+.mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+h1,h2,h3,h4,.brand-font{font-family:'Baloo 2',system-ui,sans-serif;}
+
+/* ---------- HEADER ---------- */
+header.app{
+  background:var(--graphite);
+  color:var(--paper);
+  padding:12px 20px;
+  display:flex;
+  align-items:center;
+  gap:20px;
+  flex-wrap:wrap;
+  border-bottom:4px solid var(--clay);
+  position:relative;
+}
+.cycle-badge{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:var(--yellow);color:var(--graphite);
+  font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;letter-spacing:0.4px;
+  padding:8px 20px;border-radius:20px;white-space:nowrap;
+  box-shadow:0 3px 12px rgba(0,0,0,0.28), 0 0 0 2px var(--clay-dark) inset;
+  z-index:2;
+}
+.cycle-badge b{font-size:18px;margin-left:4px;}
+.lock-btn{
+  background:none;border:1px solid #6b6b6a;color:#fff;font-size:16px;
+  width:34px;height:34px;border-radius:50%;cursor:pointer;flex:none;
+}
+.lock-btn:hover{background:rgba(255,255,255,0.12);border-color:var(--clay);}
+.empty-state{
+  background:#fff;border:1px dashed var(--line);border-radius:var(--radius);
+  padding:48px 24px;text-align:center;color:var(--ink-dim);
+}
+.empty-state .empty-icon{font-size:36px;margin-bottom:10px;}
+.empty-state h3{font-family:'Baloo 2',sans-serif;color:var(--ink);margin:0 0 8px 0;}
+.empty-state p{max-width:460px;margin:0 auto;font-size:13.5px;line-height:1.6;}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;}
+.brand-wordmark{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;color:#fff;letter-spacing:0.3px;line-height:1;}
+.brand-tagline{font-family:'Nunito Sans',sans-serif;font-size:11.5px;color:#C9C9C7;margin-top:2px;}
+.brand-divider{width:1px;height:34px;background:#6b6b6a;margin:0 4px;}
+.brand h1{font-size:14.5px;font-weight:700;margin:0;letter-spacing:0.2px;font-family:'Baloo 2',sans-serif;}
+.brand span.sub{font-size:11px;color:#C9C9C7;font-family:'IBM Plex Mono',monospace;}
+
+
+.field-inline{display:flex;flex-direction:column;gap:2px;}
+.field-inline label{font-size:10px;color:#C9C9C7;text-transform:uppercase;letter-spacing:0.6px;}
+select, input[type=text], input[type=search]{
+  font-family:inherit;font-size:13px;
+  padding:6px 8px;
+  border:1px solid #6b6b6a;
+  border-radius:var(--radius);
+  background:var(--graphite-2);
+  color:var(--paper);
+  min-width:150px;
+}
+header.app select{background:var(--graphite-2);color:var(--paper);}
+input::placeholder{color:#A9A9A7;}
+
+.you-field input{min-width:170px;}
+
+/* ---------- LAYOUT ---------- */
+main{display:flex;min-height:calc(100vh - 66px);}
+.sidebar{
+  width:220px;flex:none;
+  background:var(--paper-dim);
+  border-right:1px solid var(--line);
+  padding:16px;
+  display:flex;flex-direction:column;gap:16px;
+}
+.sidebar h3{
+  font-size:11px;text-transform:uppercase;letter-spacing:0.7px;
+  color:var(--ink-dim);margin:0 0 6px 0;font-weight:600;
+}
+.sidebar select, .sidebar input{
+  width:100%;background:#fff;color:var(--ink);border:1px solid var(--line);
+}
+.check-row{display:flex;align-items:center;gap:6px;font-size:13px;}
+.check-row input{width:auto;min-width:0;}
+.btn-clear{
+  background:none;border:1px solid var(--line);color:var(--ink-dim);
+  padding:6px 10px;border-radius:var(--radius);cursor:pointer;font-size:12px;
+  font-family:inherit;
+}
+.btn-clear:hover{border-color:var(--clay);color:var(--clay);}
+
+.content{flex:1;padding:20px 24px;min-width:0;}
+
+/* ---------- KPI BAR ---------- */
+.kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+.kpi{
+  background:#fff;border:1px solid var(--line);border-left:4px solid var(--steel);
+  padding:10px 16px;border-radius:var(--radius);min-width:140px;flex:1;
+}
+.kpi.accent{border-left-color:var(--clay);}
+.kpi .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-dim);margin-bottom:4px;}
+.kpi .val{font-size:20px;font-weight:600;font-family:'IBM Plex Mono',monospace;}
+.kpi .sub{font-size:11px;color:var(--ink-dim);margin-top:2px;}
+
+/* ---------- TOOLBAR ---------- */
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;flex-wrap:wrap;}
+.toolbar .count{font-size:12.5px;color:var(--ink-dim);}
+.toolbar .actions{display:flex;gap:8px;}
+.btn{
+  font-family:inherit;font-size:12.5px;padding:7px 14px;border-radius:var(--radius);
+  border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;
+}
+.btn:hover{border-color:var(--steel);color:var(--steel);}
+.btn.primary{background:var(--clay);color:#fff;border-color:var(--clay);}
+.btn.primary:hover{background:var(--clay-dark);color:#fff;}
+
+/* ---------- TABLE (tabla principal, vista compacta) ---------- */
+.table-wrap{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+#mainTable{width:100%;border-collapse:collapse;font-size:12.3px;table-layout:fixed;}
+#mainTable thead th{
+  background:var(--paper-dim);text-align:left;font-weight:600;
+  padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap;
+  font-size:10.5px;text-transform:uppercase;letter-spacing:0.3px;color:var(--ink-dim);
+  overflow:hidden;text-overflow:ellipsis;
+}
+#mainTable tbody td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle;overflow:hidden;}
+#mainTable tbody tr:hover{background:var(--paper-dim);cursor:pointer;}
+#mainTable tbody tr.pending td:first-child{box-shadow:inset 3px 0 0 var(--warn);}
+#mainTable tbody tr.edited td:first-child{box-shadow:inset 3px 0 0 var(--good);}
+td.num{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12.3px;}
+td.cli-cell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+td.item-cell{overflow:hidden;}
+td.item-cell .id{color:var(--ink-dim);font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+td.item-cell .nm{font-weight:600;font-size:12.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+td.item-cell .sub-tag{color:var(--ink-dim);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+.badge{
+  display:inline-block;padding:2px 7px;border-radius:12px;font-size:10.8px;font-weight:700;white-space:nowrap;
+}
+.badge.good{background:var(--good-bg);color:var(--good);}
+.badge.warn{background:var(--warn-bg);color:var(--warn);}
+.badge.bad{background:var(--bad-bg);color:var(--bad);}
+.badge.neutral{background:#EEE;color:#666;}
+.critical-flag{color:var(--bad);font-weight:700;font-size:9.5px;vertical-align:middle;}
+.exp-flag{color:var(--steel);font-weight:700;font-size:9.5px;vertical-align:middle;background:#E7F0F8;padding:1px 5px;border-radius:8px;}
+.estado-badge{
+  align-self:flex-start;font-size:11px;font-weight:700;padding:4px 10px;border-radius:12px;
+  text-transform:uppercase;letter-spacing:0.4px;
+}
+.estado-badge.pendiente{background:#FFF6CC;color:var(--warn);}
+.estado-badge.aprobado{background:var(--good-bg);color:var(--good);}
+.estado-badge.devuelto{background:var(--bad-bg);color:var(--bad);}
+.devuelto-banner{
+  background:var(--bad-bg);border:1px solid #F0C4BE;color:var(--bad);
+  padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;
+}
+.draft-banner{
+  background:var(--warn-bg);border:1px solid #EAD48A;color:var(--warn);
+  padding:10px 14px;border-radius:var(--radius);font-size:13px;margin-bottom:14px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.draft-banner button{
+  font-family:inherit;font-size:12px;padding:5px 11px;border-radius:var(--radius);cursor:pointer;
+  border:1px solid var(--warn);background:#fff;color:var(--warn);
+}
+.draft-banner button.primary{background:var(--warn);color:#fff;}
+.qs-result{padding:10px 18px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center;}
+.qs-result:hover{background:var(--paper-dim);}
+.qs-result .qs-name{font-weight:600;font-size:13.5px;}
+.qs-result .qs-meta{font-size:11.5px;color:var(--ink-dim);}
+.qs-empty{padding:16px 18px;color:var(--ink-dim);font-size:13px;}
+.mini-list-item{padding:6px 0;border-bottom:1px solid var(--line);}
+.mini-list-item:last-child{border-bottom:none;}
+.mini-list-item .mli-name{font-weight:600;}
+.mini-list-item .mli-meta{color:var(--ink-dim);font-size:11.5px;}
+.quickfill-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12.5px;color:var(--ink-dim);}
+.chip-btn{
+  font-family:inherit;font-size:12px;padding:5px 12px;border-radius:14px;
+  border:1px solid var(--steel);background:#fff;color:var(--steel);cursor:pointer;
+}
+.chip-btn:hover{background:var(--steel);color:#fff;}
+.comment-box{
+  width:100%;min-height:60px;border:1px solid var(--line);border-radius:var(--radius);
+  padding:8px 10px;font-family:inherit;font-size:13px;resize:vertical;
+}
+#historialBox{font-size:12.5px;color:var(--ink-dim);margin-top:8px;}
+.hist-entry{border-bottom:1px solid var(--line);padding:8px 0;}
+.hist-entry:last-child{border-bottom:none;}
+table.grid input.pvo-input.outlier{border:2px dashed var(--warn);}
+.bulk-table-wrap{overflow-x:auto;}
+table.bulk{width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px;}
+table.bulk th{background:var(--paper-dim);padding:7px 8px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--ink-dim);position:sticky;top:0;}
+table.bulk td{padding:6px 8px;border-bottom:1px solid var(--line);}
+table.bulk td.artname{max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}
+table.bulk input.bulk-input{width:60px;text-align:right;border:1px solid var(--line);border-radius:2px;padding:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+table.bulk input.bulk-input.pending{background:#FFF9DE;border-color:#F0DE96;}
+table.bulk input.bulk-input.filled{background:#E7F4E9;border-color:#B9DFC1;}
+table.bulk input.bulk-input.missing{border:2px solid var(--bad);}
+table.bulk td.num{text-align:right;font-family:'IBM Plex Mono',monospace;}
+
+/* ---------- PAGINATION ---------- */
+.pagination{display:flex;justify-content:center;align-items:center;gap:10px;padding:14px;font-size:12.5px;color:var(--ink-dim);}
+.pagination button{
+  font-family:inherit;background:none;border:1px solid var(--line);border-radius:var(--radius);
+  padding:5px 10px;cursor:pointer;color:var(--ink);
+}
+.pagination button:disabled{opacity:0.35;cursor:default;}
+
+/* ---------- MODAL ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(20,20,18,0.55);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:30px 16px;overflow:auto;z-index:50;
+}
+.overlay.show{display:flex;}
+.modal{
+  background:#fff;border-radius:4px;max-width:980px;width:100%;
+  box-shadow:0 20px 60px rgba(0,0,0,0.3);
+}
+.modal-head{
+  padding:18px 24px;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+  background:var(--graphite);color:#fff;border-radius:4px 4px 0 0;
+}
+.modal-head h2{margin:0 0 4px 0;font-size:16px;font-weight:600;}
+.modal-head .meta{font-size:12px;color:#C9C9C7;font-family:'IBM Plex Mono',monospace;}
+.modal-head .close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;padding:0 4px;border-radius:50%;}
+.modal-head .close:hover{background:rgba(255,255,255,0.15);}
+.modal-body{padding:20px 24px;}
+.modal-section{margin-bottom:20px;}
+.modal-section h4{
+  font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--ink-dim);
+  margin:0 0 8px 0;display:flex;align-items:center;gap:10px;
+}
+.modal-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.tag{font-size:11.5px;background:var(--paper-dim);padding:3px 9px;border-radius:12px;color:var(--ink-dim);}
+
+.grid-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);}
+table.grid{width:100%;border-collapse:collapse;font-size:12px;min-width:900px;table-layout:auto;}
+table.grid th, table.grid td{padding:6px 8px;border-bottom:1px solid #EFEBE2;border-right:1px solid #F3F0E9;white-space:nowrap;}
+table.grid th{background:var(--paper-dim);font-weight:600;font-size:11px;color:var(--ink-dim);position:sticky;top:0;}
+table.grid td.rowlabel, table.grid th.rowlabel{
+  position:sticky;left:0;background:#fff;text-align:left;font-weight:600;z-index:2;
+  border-right:2px solid var(--line);min-width:150px;
+}
+table.grid th.rowlabel{background:var(--paper-dim);z-index:3;}
+table.grid td.num{text-align:right;font-family:'IBM Plex Mono',monospace;color:var(--ink-dim);}
+table.grid td.past{background:#FAF9F6;color:#B7B0A0;}
+table.grid th.frozen, table.grid td.frozen{background:#FFF9E0;}
+table.grid td.frozen{color:#8A7328;}
+table.grid input.pvo-input.frozen{background:#FFF3C4;color:#8A7328;border-color:#F0DE96;}
+.lock-ico{font-size:10px;opacity:0.75;}
+table.grid input.pvo-input{
+  width:64px;text-align:right;border:1px solid var(--line);border-radius:2px;
+  padding:4px 5px;font-family:'IBM Plex Mono',monospace;font-size:12px;
+}
+table.grid input.pvo-input:focus{outline:2px solid var(--steel);border-color:var(--steel);}
+table.grid input.pvo-input.past{background:#F1EFE9;color:#A79F8E;}
+table.grid input.pvo-input.pending{background:#FFF9DE;border-color:#F0DE96;color:#7A5F00;}
+table.grid input.pvo-input.pending::placeholder{color:#C9B65E;}
+table.grid input.pvo-input.filled{background:#E7F4E9;border-color:#B9DFC1;color:#1F5C33;}
+table.grid input.pvo-input.missing{border:2px solid var(--bad);box-shadow:0 0 0 2px rgba(227,6,19,0.15);}
+.grid-legend{display:flex;gap:16px;font-size:11px;color:var(--ink-dim);margin:8px 0 0 0;flex-wrap:wrap;}
+.grid-legend span{display:flex;align-items:center;gap:5px;}
+.grid-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;border:1px solid rgba(0,0,0,0.1);}
+table.grid tr.total td{font-weight:600;background:#FBF9F4;}
+table.grid td.diff-good{color:var(--good);}
+table.grid td.diff-bad{color:var(--bad);}
+
+.modal-foot{
+  padding:16px 24px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.save-status{font-size:12px;color:var(--ink-dim);}
+.toggle-hist{font-size:12px;color:var(--steel);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;}
+
+.hint{font-size:12px;color:var(--ink-dim);background:var(--paper-dim);padding:8px 12px;border-radius:var(--radius);margin-bottom:14px;}
+.fecha-banner{font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:var(--radius);margin-bottom:14px;}
+.fecha-banner.ok{background:var(--good-bg);color:var(--good);}
+.fecha-banner.warn{background:var(--warn-bg);color:var(--warn);}
+.fecha-banner.bad{background:var(--bad-bg);color:var(--bad);}
+
+/* ---------- LOGIN ---------- */
+.login-screen{
+  position:fixed;inset:0;background:var(--graphite);
+  display:flex;align-items:center;justify-content:center;z-index:100;
+  padding:20px;
+}
+.login-card{
+  background:#fff;border-radius:4px;width:100%;max-width:380px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);overflow:hidden;
+}
+.login-card .lc-top{
+  background:var(--graphite);color:#fff;padding:22px 26px;border-bottom:3px solid var(--clay);
+}
+.login-card .lc-top .mark{
+  width:10px;height:10px;background:var(--clay);display:inline-block;transform:rotate(45deg);margin-right:8px;
+}
+.login-card .lc-top h1{font-size:16px;margin:0 0 3px 0;font-weight:600;display:inline;}
+.login-card .lc-top .sub{display:block;font-size:12px;color:#C9C9C7;font-family:'IBM Plex Mono',monospace;margin-top:6px;}
+.login-card .lc-body{padding:26px;}
+.login-field{margin-bottom:14px;}
+.login-field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--ink-dim);margin-bottom:5px;}
+.login-field input{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius);
+  font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink);background:#fff;
+}
+.login-field input:focus{outline:2px solid var(--steel);border-color:var(--steel);}
+.login-error{
+  background:var(--bad-bg);color:var(--bad);font-size:12.5px;padding:8px 10px;border-radius:var(--radius);
+  margin-bottom:14px;display:none;
+}
+.login-error.show{display:block;}
+.btn-login{
+  width:100%;padding:11px;border:none;border-radius:var(--radius);background:var(--clay);color:#fff;
+  font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+}
+.btn-login:hover{background:#9c4426;}
+.login-hint{font-size:11.5px;color:var(--ink-dim);margin-top:14px;line-height:1.5;}
+
+.welcome-toast{
+  position:fixed;top:16px;left:50%;transform:translateX(-50%);
+  background:var(--good-bg);color:var(--good);border:1px solid #BFDCC0;
+  padding:10px 20px;border-radius:var(--radius);font-size:13.5px;font-weight:500;
+  z-index:200;box-shadow:0 6px 20px rgba(0,0,0,0.12);
+  display:none;
+}
+.welcome-toast.show{display:block;}
+
+.logout-link{
+  background:none;border:none;color:#C9C9C7;font-size:11.5px;text-decoration:underline;cursor:pointer;
+  font-family:inherit;padding:0;
+}
+.user-chip{font-size:12px;color:#fff;display:flex;align-items:center;gap:8px;}
+.user-chip b{color:#fff;}
+.avatar{
+  width:30px;height:30px;border-radius:50%;background:var(--clay);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;
+  font-weight:700;font-size:12.5px;flex:none;
+}
+
+/* ---------- CATEGORY ICONS ---------- */
+.cat-icon{
+  width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  flex:none;
+}
+.cat-icon svg{width:15px;height:15px;}
+.cat-icon.cubiertas{background:#E7F0F8;color:var(--steel);}
+.cat-icon.rotomoldeo{background:#FFF6CC;color:var(--yellow-ink);}
+.cat-icon.seco{background:#F2F2F1;color:var(--graphite);}
+.item-flex{display:flex;align-items:center;gap:10px;}
+
+/* ---------- PROGRESS BAR ---------- */
+.progress-track{
+  width:100%;height:7px;border-radius:4px;background:#EDEDEC;overflow:hidden;margin-top:6px;
+}
+.progress-fill{height:100%;border-radius:4px;background:var(--clay);transition:width 0.3s ease;}
+.progress-fill.warn{background:var(--yellow-dark);}
+.progress-fill.bad{background:var(--red);}
+
+/* ---------- MINI CHART (modal) ---------- */
+.mini-chart-wrap{overflow-x:auto;padding:14px 6px 4px 6px;background:var(--paper-dim);border-radius:var(--radius);margin-bottom:12px;}
+.mini-chart{display:flex;align-items:flex-end;gap:14px;min-width:max-content;height:120px;padding:0 6px;}
+.mc-col{display:flex;flex-direction:column;align-items:center;gap:6px;width:46px;flex:none;}
+.mc-bars{display:flex;align-items:flex-end;gap:2px;height:80px;}
+.mc-bar{width:11px;border-radius:2px 2px 0 0;min-height:2px;}
+.mc-bar.venta{background:var(--graphite);}
+.mc-bar.ppto{background:#C7C7C5;}
+.mc-bar.sug{background:var(--yellow);}
+.mc-bar.proy{background:var(--clay);}
+.mc-label{font-size:10px;color:var(--ink-dim);white-space:nowrap;}
+.mc-col.mc-past{opacity:0.45;}
+.mini-chart-legend{display:flex;gap:16px;font-size:11px;color:var(--ink-dim);padding:0 10px 10px 10px;}
+.mini-chart-legend span{display:flex;align-items:center;gap:5px;}
+.mini-chart-legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+
+@media (max-width:900px){
+  main{flex-direction:column;}
+  .sidebar{width:auto;border-right:none;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap;}
+  .sidebar > div{flex:1;min-width:140px;}
+  .cycle-badge{position:static;transform:none;margin:4px auto;order:1;}
+}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="lc-top">
+      <div class="brand-wordmark">TOPTEC</div>
+      <div class="brand-tagline">Es fácil construir</div>
+    </div>
+    <div class="lc-body">
+      <div style="font-size:12.5px;color:var(--ink-dim);margin-bottom:16px;">Colaboración de Demanda · Equipo Comercial</div>
+      <div class="login-error" id="loginError"></div>
+      <form id="loginForm">
+        <div class="login-field">
+          <label>Correo electrónico</label>
+          <input type="email" id="loginUser" autocomplete="username" placeholder="tu.correo@toptec.com" required>
+        </div>
+        <div class="login-field">
+          <label>Contraseña</label>
+          <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-login">Ingresar</button>
+      </form>
+      <div class="login-hint">Acceso individual por comercial. Si no tienes credenciales, solicítalas al equipo de planeación de demanda.</div>
+    </div>
+  </div>
+</div>
+
+<div class="welcome-toast" id="welcomeToast"></div>
+
+<div id="appRoot" style="display:none;">
+
+<header class="app">
+  <div class="brand">
+    <div>
+      <div class="brand-wordmark">TOPTEC</div>
+      <div class="brand-tagline">Es fácil construir</div>
+    </div>
+    <div class="brand-divider"></div>
+    <div>
+      <h1>Colaboración de Demanda</h1>
+      <div><span class="sub">S&OP · EQUIPO COMERCIAL</span></div>
+    </div>
+  </div>
+
+  <div class="cycle-badge">CICLO PVO <b id="cycleNum">–</b></div>
+
+  <div class="field-inline">
+    <label>Zona / Vendedor</label>
+    <select id="selVendedor"></select>
+  </div>
+  <div class="field-inline">
+    <label>Conectado como</label>
+    <div class="user-chip">
+      <div class="avatar" id="userAvatar"></div>
+      <div id="userChip"></div>
+    </div>
+  </div>
+  <div class="field-inline">
+    <label>&nbsp;</label>
+    <button class="logout-link" id="btnLogout">Cerrar sesión</button>
+  </div>
+  <button class="lock-btn" id="btnAdminLock" title="Modo administrador">&#128274;</button>
+</header>
+
+<main>
+  <div class="sidebar">
+    <div>
+      <h3>Cliente</h3>
+      <input list="dlCliente" id="inpCliente" placeholder="Buscar cliente...">
+      <datalist id="dlCliente"></datalist>
+    </div>
+    <div>
+      <h3>Buscar artículo</h3>
+      <input type="text" id="inpBuscar" placeholder="Nombre o código...">
+    </div>
+    <button class="btn-clear" id="btnLimpiar">Limpiar filtros</button>
+  </div>
+
+  <div class="content">
+    <div class="hint" id="hintBox"></div>
+    <div id="fechaLimiteBanner" style="display:none;"></div>
+
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="empty-icon">&#128193;</div>
+      <h3>Todavía no hay catálogo cargado</h3>
+      <p>Un administrador debe iniciar el <b>modo administrador</b> (candado arriba a la derecha) y cargar el archivo Excel con la data del ciclo PVO vigente.</p>
+    </div>
+
+    <div id="dataArea">
+    <div class="kpis" id="kpiBar"></div>
+
+    <div class="toolbar">
+      <div class="count" id="rowCount"></div>
+      <div class="actions">
+        <button class="btn" id="btnBulk">Captura masiva por cliente</button>
+        <button class="btn" id="btnExport">Exportar CSV</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="mainTable">
+        <colgroup>
+          <col style="width:14%">
+          <col style="width:29%">
+          <col style="width:11%">
+          <col style="width:11%">
+          <col style="width:12%">
+          <col style="width:13%">
+          <col style="width:10%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Artículo</th>
+            <th class="num">AA 2025</th>
+            <th class="num">PPTO ciclo</th>
+            <th class="num">Sugerido</th>
+            <th class="num">Proyección</th>
+            <th>vs PPTO</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+    </div><!-- /dataArea -->
+  </div>
+</main>
+
+</div><!-- /appRoot -->
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="mTitle">Artículo</h2>
+        <div class="meta" id="mMeta"></div>
+      </div>
+      <span class="estado-badge" id="estadoBadge" style="display:none;"></span>
+      <button class="close" id="btnClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tags" id="mTags"></div>
+      <div id="devueltoBanner" class="devuelto-banner" style="display:none;"></div>
+      <div id="draftBanner" class="draft-banner" style="display:none;"></div>
+
+      <div class="modal-section">
+        <h4>Comparativo visual (ene-26 a dic-27) — desliza para ver todos los meses</h4>
+        <div class="mini-chart-wrap">
+          <div class="mini-chart" id="miniChart"></div>
+        </div>
+        <div class="mini-chart-legend">
+          <span><i style="background:var(--graphite)"></i>Venta real</span>
+          <span><i style="background:#C7C7C5"></i>PPTO</span>
+          <span><i style="background:var(--yellow)"></i>Sugerido estadístico</span>
+          <span><i style="background:var(--clay)"></i>Tu proyección</span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h4>Proyección mensual — captura tu plan de ventas
+          <button class="toggle-hist" id="btnToggleHist">mostrar histórico ene–ago 2026</button>
+        </h4>
+        <div class="grid-legend">
+          <span><i style="background:#FFF9DE;border-color:#F0DE96;"></i>Pendiente por diligenciar</span>
+          <span><i style="background:#E7F4E9;border-color:#B9DFC1;"></i>Ya diligenciado</span>
+          <span><i style="background:#fff;border:2px solid var(--bad);"></i>Falta al intentar guardar</span>
+          <span><i style="background:#fff;border:2px dashed var(--warn);"></i>Muy distinto a PPTO/Sugerido</span>
+        </div>
+        <div class="quickfill-row">
+          <span>Llenar rápido:</span>
+          <button class="chip-btn" id="btnCopyPpto">Usar PPTO</button>
+          <button class="chip-btn" id="btnCopySug">Usar Sugerido</button>
+        </div>
+        <div class="grid-wrap">
+          <table class="grid" id="gridTable"></table>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h4>Comentario (opcional)</h4>
+        <textarea id="inpComentario" class="comment-box" placeholder="Ej. Cliente cerró contrato nuevo, sube el pedido de nov-26 en adelante..."></textarea>
+      </div>
+
+      <div class="modal-section" id="historialSection" style="display:none;">
+        <h4><button class="toggle-hist" id="btnToggleHistorial">ver historial de cambios</button></h4>
+        <div id="historialBox" style="display:none;"></div>
+      </div>
+
+      <div class="modal-section" id="adminApprovalSection" style="display:none;">
+        <h4>Acciones de supervisor</h4>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn" style="border-color:var(--good);color:var(--good);" id="btnAprobar">&#10003; Aprobar</button>
+          <button class="btn" style="border-color:var(--bad);color:var(--bad);" id="btnDevolver">&#8617; Devolver con comentario</button>
+          <button class="btn" id="btnReabrir" style="display:none;">Reabrir para edición</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <div class="save-status" id="saveStatus"></div>
+      <div>
+        <button class="btn" id="btnCancel">Cancelar</button>
+        <button class="btn primary" id="btnGuardar">Guardar proyección</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="adminOverlay">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-head">
+      <div>
+        <h2>&#128274; Modo administrador</h2>
+        <div class="meta">Ciclo PVO, carga de catálogo</div>
+      </div>
+      <button class="close" id="btnAdminClose">&times;</button>
+    </div>
+    <div class="modal-body">
+
+      <div id="adminLoginBox">
+        <div class="login-error" id="adminLoginError"></div>
+        <form id="adminLoginForm">
+          <div class="login-field">
+            <label>Usuario administrador</label>
+            <input type="text" id="adminUser" autocomplete="off" placeholder="ADMIN" required>
+          </div>
+          <div class="login-field">
+            <label>Contraseña</label>
+            <input type="password" id="adminPass" autocomplete="off" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn-login">Desbloquear</button>
+        </form>
+      </div>
+
+      <div id="adminPanelBox" style="display:none;">
+        <div class="modal-section">
+          <h4>Estado actual</h4>
+          <div id="adminCatalogInfo" class="hint" style="margin-bottom:0;"></div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Cambiar ciclo PVO vigente</h4>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px 0;">
+            Define qué mes es el primer mes editable (mes N). Todo el sistema — meses congelados, ventana editable, badge de ciclo — se reorganiza automáticamente.
+          </p>
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="login-field" style="margin-bottom:0;">
+              <label>Mes</label>
+              <select id="adminCicloMes"></select>
+            </div>
+            <div class="login-field" style="margin-bottom:0;width:100px;">
+              <label>Año</label>
+              <input type="number" id="adminCicloAnio" min="2024" max="2035" style="width:100px;">
+            </div>
+            <button class="btn primary" id="btnAplicarCiclo" style="height:38px;">Aplicar ciclo</button>
+          </div>
+          <div id="adminCicloStatus" style="font-size:12.5px;margin-top:8px;"></div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Gestionar usuarios</h4>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px 0;">
+            Crea la cuenta de acceso (correo + contraseña) y su perfil (nombre, zona, rol) en un solo paso.
+            La contraseña temporal se la debes compartir tú mismo al comercial por otro medio.
+          </p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="login-field" style="margin-bottom:0;">
+              <label>Correo</label>
+              <input type="email" id="nuEmail" placeholder="comercial@toptec.com">
+            </div>
+            <div class="login-field" style="margin-bottom:0;">
+              <label>Contraseña temporal</label>
+              <input type="text" id="nuPassword" placeholder="mínimo 6 caracteres">
+            </div>
+            <div class="login-field" style="margin-bottom:0;">
+              <label>Nombre completo</label>
+              <input type="text" id="nuNombre" placeholder="Ej. Juan Pérez">
+            </div>
+            <div class="login-field" style="margin-bottom:0;">
+              <label>Rol</label>
+              <select id="nuRol">
+                <option value="comercial">Comercial (fijo a su zona)</option>
+                <option value="supervisor">Supervisor de zona (aprueba/devuelve)</option>
+                <option value="admin">Administrador (ve todas las zonas)</option>
+              </select>
+            </div>
+            <div class="login-field" style="margin-bottom:0;grid-column:1 / -1;" id="nuZonaWrap">
+              <label>Zona</label>
+              <select id="nuZona"></select>
+            </div>
+          </div>
+          <button class="btn primary" id="btnCrearUsuario" style="margin-top:10px;">Crear usuario</button>
+          <div id="nuStatus" style="font-size:12.5px;margin-top:8px;"></div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Fecha límite del ciclo</h4>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px 0;">
+            Se muestra como aviso a todo el equipo mientras se acerca el cierre.
+          </p>
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+            <div class="login-field" style="margin-bottom:0;">
+              <label>Fecha límite</label>
+              <input type="date" id="adminFechaLimite">
+            </div>
+            <button class="btn primary" id="btnAplicarFecha" style="height:38px;">Guardar fecha</button>
+          </div>
+          <div id="adminFechaStatus" style="font-size:12.5px;margin-top:8px;"></div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Cargar Excel actualizado</h4>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px 0;">
+            Sube el archivo con la misma estructura de columnas (VEN_Vendedor, CLI_JerarquiaActual, VTA_PRO_IdProducto, PRO_Producto, PRO_PesoUnidadVenta, VEN_Destino, y las columnas mensuales VEN_/PVO_/PTO_Cant_/PVO_SE_Proyec_). El catálogo se reemplaza para todo el equipo.
+          </p>
+          <input type="file" id="adminFileInput" accept=".xlsx,.xls">
+          <div id="adminUploadConfirm" style="display:none;margin-top:10px;background:var(--paper-dim);border-radius:var(--radius);padding:12px 14px;font-size:12.5px;"></div>
+          <div id="adminUploadStatus" style="font-size:12.5px;margin-top:8px;"></div>
+          <div style="margin-top:10px;">
+            <button class="btn" id="btnRevertirCatalogo" style="display:none;">Revertir al catálogo anterior</button>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Avance de captura por zona</h4>
+          <div class="grid-wrap">
+            <table class="grid" id="adminAvanceTable"></table>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Comparación con el ciclo anterior</h4>
+          <div id="adminCicloComparativo" class="hint" style="margin-bottom:0;">Aún no hay un ciclo anterior guardado (se genera automáticamente la primera vez que cargues un Excel nuevo o cambies de ciclo).</div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Resumen ejecutivo</h4>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:280px;">
+              <div style="font-size:11px;text-transform:uppercase;color:var(--ink-dim);margin-bottom:6px;font-weight:600;">Top 5 mayor brecha vs PPTO</div>
+              <div id="adminTopBrecha" style="font-size:12.5px;"></div>
+            </div>
+            <div style="flex:1;min-width:280px;">
+              <div style="font-size:11px;text-transform:uppercase;color:var(--ink-dim);margin-bottom:6px;font-weight:600;">Clientes con menor % de captura</div>
+              <div id="adminTopPendientes" style="font-size:12.5px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h4>Exportar</h4>
+          <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 10px 0;">
+            Descarga un Excel con el catálogo y todo lo capturado hasta este momento, listo para seguir usándolo en el proceso de PVO.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn primary" id="btnExportExcel">Descargar Excel actualizado (completo)</button>
+            <button class="btn" id="btnExportAvance">Descargar resumen de avance (Excel)</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="quickSearchOverlay">
+  <div class="modal" style="max-width:560px;margin-top:60px;">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--line);">
+      <input type="text" id="quickSearchInput" placeholder="Buscar artículo, código o cliente... (Esc para cerrar)"
+        style="width:100%;border:none;outline:none;font-size:16px;font-family:inherit;">
+    </div>
+    <div id="quickSearchResults" style="max-height:400px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<div class="overlay" id="bulkOverlay">
+  <div class="modal" style="max-width:1000px;">
+    <div class="modal-head">
+      <div>
+        <h2>Captura masiva por cliente</h2>
+        <div class="meta" id="bulkMeta">Elige un cliente para ver todos sus artículos a la vez</div>
+      </div>
+      <button class="close" id="btnBulkClose">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="login-field" style="max-width:340px;">
+        <label>Cliente</label>
+        <select id="bulkClienteSelect"><option value="">Selecciona un cliente...</option></select>
+      </div>
+      <div id="bulkContent" style="margin-top:16px;"></div>
+    </div>
+    <div class="modal-foot">
+      <div class="save-status" id="bulkSaveStatus"></div>
+      <div>
+        <button class="btn" id="btnBulkCancel">Cerrar</button>
+        <button class="btn primary" id="btnBulkGuardar" style="display:none;">Guardar todo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+
+/* =====================================================================
+   FIREBASE — inicialización real (Firestore + Authentication)
+   ===================================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAuxwkXqFIFc-_BFZ583G4gSzqDnB6cpI0",
+  authDomain: "pvo-colaboracion.firebaseapp.com",
+  projectId: "pvo-colaboracion",
+  storageBucket: "pvo-colaboracion.firebasestorage.app",
+  messagingSenderId: "1051682796469",
+  appId: "1:1051682796469:web:32011883cbd731e4831ffc",
+  measurementId: "G-V33F8WWB58"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* ⚠️ IMPORTANTE: reemplaza esto por el/los correos reales que deben
+   tener permiso de escritura sobre el catálogo, el ciclo PVO y la
+   gestión de usuarios (deben coincidir EXACTO con las reglas de
+   seguridad de Firestore que se instalen en la consola). */
+const ADMIN_EMAILS = ['epatino@toptec.com.co', 'drodriguez@toptec.com.co'];
+
+/* =====================================================================
+   STORAGE — bloques de configuración (catálogo, ciclo, fecha límite)
+   guardados en Firestore, partidos en "chunks" para no chocar con el
+   límite de 1MB por documento. Los borradores personales (no
+   compartidos) siguen viviendo en localStorage del propio navegador.
+   ===================================================================== */
+const CONFIG_COLL = 'config';
+const CHUNK_SIZE = 700000;
+
+async function fsSetBlob(key, value){
+  try{
+    const metaRef = db.collection(CONFIG_COLL).doc(key);
+    const oldMetaSnap = await metaRef.get();
+    const oldCount = oldMetaSnap.exists ? (oldMetaSnap.data().chunkCount||0) : 0;
+    const chunks = [];
+    for(let i=0;i<value.length;i+=CHUNK_SIZE) chunks.push(value.slice(i,i+CHUNK_SIZE));
+    const batch = db.batch();
+    batch.set(metaRef, {chunkCount:chunks.length, updatedAt:new Date().toISOString()});
+    for(let i=chunks.length;i<oldCount;i++) batch.delete(db.collection(CONFIG_COLL).doc(`${key}__chunk${i}`));
+    chunks.forEach((c,i)=> batch.set(db.collection(CONFIG_COLL).doc(`${key}__chunk${i}`), {data:c}));
+    await batch.commit();
+    return {key, value, shared:true};
+  }catch(e){ console.error('fsSetBlob error', e); return null; }
+}
+async function fsGetBlob(key){
+  try{
+    const metaRef = db.collection(CONFIG_COLL).doc(key);
+    const metaSnap = await metaRef.get();
+    if(!metaSnap.exists) return null;
+    const n = metaSnap.data().chunkCount||0;
+    if(!n) return null;
+    const snaps = await Promise.all(Array.from({length:n},(_,i)=>db.collection(CONFIG_COLL).doc(`${key}__chunk${i}`).get()));
+    const value = snaps.map(s=> s.exists? s.data().data:'').join('');
+    return {key, value, shared:true};
+  }catch(e){ console.error('fsGetBlob error', e); return null; }
+}
+async function fsDeleteBlob(key){
+  try{
+    const metaRef = db.collection(CONFIG_COLL).doc(key);
+    const metaSnap = await metaRef.get();
+    const batch = db.batch();
+    if(metaSnap.exists){
+      const n = metaSnap.data().chunkCount||0;
+      for(let i=0;i<n;i++) batch.delete(db.collection(CONFIG_COLL).doc(`${key}__chunk${i}`));
+      batch.delete(metaRef);
+    }
+    await batch.commit();
+    return {key, deleted:true, shared:true};
+  }catch(e){ console.error('fsDeleteBlob error', e); return null; }
+}
+
+const STORAGE = {
+  async get(key, shared){
+    if(shared) return fsGetBlob(key);
+    try{
+      const v = localStorage.getItem('toptec_'+key);
+      return v!==null ? {key, value:v, shared} : null;
+    }catch(e){ return null; }
+  },
+  async set(key, value, shared){
+    if(shared) return fsSetBlob(key, value);
+    try{
+      localStorage.setItem('toptec_'+key, value);
+      return {key, value, shared};
+    }catch(e){ return null; }
+  },
+  async delete(key, shared){
+    if(shared) return fsDeleteBlob(key);
+    try{ localStorage.removeItem('toptec_'+key); return {key, deleted:true, shared}; }catch(e){ return null; }
+  }
+};
+
+/* =====================================================================
+   LOGIN — Firebase Authentication (correo + contraseña reales).
+   El perfil (nombre, zona, rol) vive en Firestore, colección
+   "usuarios", con el correo (en minúsculas) como ID del documento.
+   El "modo administrador" (candado) sigue siendo una capa aparte, con
+   su propia contraseña fija, para cambiar el ciclo PVO y cargar el
+   Excel — no depende de Firebase.
+   ===================================================================== */
+const ADMIN_MODE_USER = 'ADMIN';
+const ADMIN_MODE_PASS = 'ADMIN123';
+
+let loggedUser = null;
+let currentUserName = '';
+let adminUnlocked = false;
+
+/* =====================================================================
+   PARSER DE EXCEL — lee las columnas por NOMBRE de encabezado (no por
+   posición), así que resiste que el archivo traiga columnas en otro
+   orden o con más/menos meses. Así se calcula todo directo del Excel,
+   sin depender de ninguna data guardada de antemano en el código.
+   ===================================================================== */
+const MES_NOMBRES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+const CP1252_EXTRA = {0x80:0x20AC,0x82:0x201A,0x83:0x0192,0x84:0x201E,0x85:0x2026,0x86:0x2020,0x87:0x2021,0x88:0x02C6,0x89:0x2030,0x8A:0x0160,0x8B:0x2039,0x8C:0x0152,0x8E:0x017D,0x91:0x2018,0x92:0x2019,0x93:0x201C,0x94:0x201D,0x95:0x2022,0x96:0x2013,0x97:0x2014,0x98:0x02DC,0x99:0x2122,0x9A:0x0161,0x9B:0x203A,0x9C:0x0153,0x9E:0x017E,0x9F:0x0178};
+const CP1252_REVERSE = {};
+Object.entries(CP1252_EXTRA).forEach(([b,cp])=>{ CP1252_REVERSE[cp]=Number(b); });
+function fixEncoding(s){
+  if(typeof s !== 'string') return s;
+  try{
+    const bytes = [];
+    for(const ch of s){
+      const cp = ch.codePointAt(0);
+      if(cp<=0xFF) bytes.push(cp);
+      else if(CP1252_REVERSE[cp]!==undefined) bytes.push(CP1252_REVERSE[cp]);
+      else return s;
+    }
+    return new TextDecoder('utf-8').decode(new Uint8Array(bytes));
+  }catch(e){ return s; }
+}
+function parseNum(v){
+  if(v===null||v===undefined||v==='') return 0;
+  const n = typeof v==='number' ? v : parseFloat(String(v).replace(',','.'));
+  return isNaN(n) ? 0 : Math.round(n);
+}
+function parsePeso(v){
+  if(v===null||v===undefined||v==='') return 0;
+  const n = typeof v==='number' ? v : parseFloat(String(v).replace(',','.'));
+  return isNaN(n) ? 0 : Math.round(n*1000)/1000;
+}
+const EXCLUDE_ZONAS = new Set(['PROMOTOR VALLE','VARIOS','NUEVOS NEGOCIOS','LOGISTICA','-Ningún empleado de ventas/comprador-']);
+
+function findSheetRows(wb){
+  for(const name of wb.SheetNames){
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], {header:1, defval:null});
+    if(rows.length && Array.isArray(rows[0]) && rows[0].some(h=>h==='PVO_HV_Llave')) return rows;
+  }
+  return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:null});
+}
+
+function parseWorkbook(wb){
+  const rows = findSheetRows(wb);
+  if(!rows.length) throw new Error('El archivo no tiene filas legibles.');
+  const header = rows[0].map(h=> h===null? '' : String(h));
+
+  const venRaw=[], pptoCols=[], sugCols=[];
+  let vendCol=-1, cliCol=-1, itemIdCol=-1, itemNomCol=-1, pesoCol=-1, destinoCol=-1;
+
+  header.forEach((h, ci)=>{
+    const hf = fixEncoding(h);
+    if(hf==='VEN_Destino') destinoCol=ci;
+    else if(hf==='VEN_Vendedor') vendCol=ci;
+    else if(hf==='CLI_JerarquiaActual') cliCol=ci;
+    else if(hf==='VTA_PRO_IdProducto') itemIdCol=ci;
+    else if(hf==='PRO_Producto') itemNomCol=ci;
+    else if(hf==='PRO_PesoUnidadVenta') pesoCol=ci;
+    else{
+      let m;
+      if((m = hf.match(/^(VEN|PVO)_([A-Za-z]{3})_(\d{2})$/i))){
+        const mIdx = MES_NOMBRES.indexOf(m[2].toLowerCase());
+        if(mIdx>=0) venRaw.push({ci, kind:m[1].toUpperCase(), y:2000+parseInt(m[3],10), m:mIdx+1});
+      } else if((m = hf.match(/^PTO_Cant_([A-Za-z]{3})_(\d{4})$/i))){
+        const mIdx = MES_NOMBRES.indexOf(m[1].toLowerCase());
+        if(mIdx>=0) pptoCols.push({ci, y:parseInt(m[2],10), m:mIdx+1});
+      } else if((m = hf.match(/^PVO_SE_Proyec_([a-zA-Z]{3})-(\d{2})$/i))){
+        const mIdx = MES_NOMBRES.indexOf(m[1].toLowerCase());
+        if(mIdx>=0) sugCols.push({ci, y:2000+parseInt(m[2],10), m:mIdx+1});
+      }
+    }
+  });
+
+  if(vendCol<0||cliCol<0||itemIdCol<0||itemNomCol<0||pesoCol<0||destinoCol<0){
+    throw new Error('No se reconocen las columnas base esperadas (VEN_Vendedor, CLI_JerarquiaActual, VTA_PRO_IdProducto, PRO_Producto, PRO_PesoUnidadVenta, VEN_Destino). Verifica que sea el archivo correcto.');
+  }
+  const sortByMonth = cols => cols.slice().sort((a,b)=>(a.y*12+a.m)-(b.y*12+b.m));
+  const venSorted  = sortByMonth(venRaw.filter(c=>c.kind==='VEN'));
+  const pvoSorted  = sortByMonth(venRaw.filter(c=>c.kind==='PVO'));
+  const pptoSorted = sortByMonth(pptoCols);
+  const sugSorted  = sortByMonth(sugCols);
+  if(!venSorted.length||!pvoSorted.length||!pptoSorted.length||!sugSorted.length){
+    throw new Error('No se encontraron todas las series esperadas (venta real, PVO, PPTO, sugerido estadístico) en el archivo.');
+  }
+  const labelOf = c => MES_NOMBRES[c.m-1]+'-'+String(c.y).slice(2);
+  const meta = {
+    ven_start: labelOf(venSorted[0]), ven_len: venSorted.length,
+    ppto_start: labelOf(pptoSorted[0]), ppto_len: pptoSorted.length,
+    sug_start: labelOf(sugSorted[0]), sug_len: sugSorted.length,
+    pvo_start: labelOf(pvoSorted[0]), pvo_len: pvoSorted.length,
+    cycle_month: pvoSorted[0].m
+  };
+
+  const vendList=[], vendIdx={}, cliList=[], cliIdx={}, canalList=[], canalIdx={};
+  const getIdx=(val,list,idx)=>{ if(!(val in idx)){ idx[val]=list.length; list.push(val); } return idx[val]; };
+
+  const dataRows=[]; let skipped=0;
+  for(let r=1;r<rows.length;r++){
+    const row = rows[r];
+    if(!row) continue;
+    const vendRawVal = row[vendCol];
+    if(vendRawVal===null||vendRawVal===undefined||vendRawVal==='') continue;
+    const vend = fixEncoding(vendRawVal);
+    if(EXCLUDE_ZONAS.has(vend)){ skipped++; continue; }
+    const itemId = row[itemIdCol];
+    if(itemId===null||itemId===undefined||itemId==='') continue;
+    const cliente = fixEncoding(row[cliCol]);
+    const itemNom = fixEncoding(row[itemNomCol]);
+    const peso = parsePeso(row[pesoCol]);
+    const destino = fixEncoding(row[destinoCol]);
+    const vi = getIdx(vend, vendList, vendIdx);
+    const ci = getIdx(cliente, cliList, cliIdx);
+    const di = getIdx(destino, canalList, canalIdx);
+    const ven  = venSorted.map(c=>parseNum(row[c.ci]));
+    const ppto = pptoSorted.map(c=>parseNum(row[c.ci]));
+    const sug  = sugSorted.map(c=>parseNum(row[c.ci]));
+    const pvo  = pvoSorted.map(c=>parseNum(row[c.ci]));
+    dataRows.push([vi, ci, String(itemId), itemNom, peso, di, ven, ppto, sug, pvo]);
+  }
+  return { vend:vendList, cli:cliList, canal:canalList, rows:dataRows, meta, skipped };
+}
+
+/* =====================================================================
+   MODELO DE MESES — mutable: se recalcula cada vez que se carga un
+   catálogo nuevo o el administrador cambia el ciclo PVO manualmente.
+   ===================================================================== */
+let DATA = null;               // {vend, cli, canal, rows, meta}
+let cycleOverride = null;      // label 'mes-aa' que reemplaza meta.pvo_start, si el admin lo cambia
+let VEN_META = null;
+let VEN_OFFSET=0, PPTO_OFFSET=0, SUG_OFFSET=0, PVO_OFFSET=0, PVO_LEN=0, TOTAL_MONTHS=0;
+let MASTER_MONTHS = [];
+let BASE_ABS = 0;
+
+function parseLabel(label){
+  const [mesStr,yyStr] = label.split('-');
+  const mIdx = MES_NOMBRES.indexOf(mesStr.toLowerCase());
+  const y = 2000+parseInt(yyStr,10);
+  return {y, m:mIdx+1};
+}
+function absMonth(y,m){ return y*12+m; }
+
+function computeMonthModel(){
+  if(!DATA) return;
+  VEN_META = Object.assign({}, DATA.meta);
+  if(cycleOverride){
+    const p = parseLabel(cycleOverride);
+    VEN_META.pvo_start = cycleOverride;
+    VEN_META.cycle_month = p.m;
+  }
+  const base = parseLabel(VEN_META.ven_start);
+  BASE_ABS = absMonth(base.y, base.m);
+  const offsetOf = label=>{ const p=parseLabel(label); return absMonth(p.y,p.m)-BASE_ABS; };
+  VEN_OFFSET  = offsetOf(VEN_META.ven_start);
+  PPTO_OFFSET = offsetOf(VEN_META.ppto_start);
+  SUG_OFFSET  = offsetOf(VEN_META.sug_start);
+  PVO_OFFSET  = offsetOf(VEN_META.pvo_start);
+  PVO_LEN     = VEN_META.pvo_len;
+  TOTAL_MONTHS = Math.max(
+    VEN_OFFSET+VEN_META.ven_len, PPTO_OFFSET+VEN_META.ppto_len,
+    SUG_OFFSET+VEN_META.sug_len, PVO_OFFSET+VEN_META.pvo_len,
+    PVO_OFFSET+PVO_LEN
+  );
+  MASTER_MONTHS = [];
+  for(let i=0;i<TOTAL_MONTHS;i++){
+    const abs = BASE_ABS+i;
+    const y = Math.floor((abs-1)/12);
+    const m = abs - y*12;
+    MASTER_MONTHS.push({idx:i, label: MES_NOMBRES[m-1]+'-'+String(y).slice(2), y, m});
+  }
+  document.getElementById('cycleNum').textContent = VEN_META.cycle_month;
+}
+function classify(idx){
+  if(idx < PVO_OFFSET) return 'past';
+  if(idx===PVO_OFFSET || idx===PVO_OFFSET+1) return 'frozen';
+  if(idx <= PVO_OFFSET+PVO_LEN-1) return '';
+  return 'past';
+}
+function isEditable(idx){ return idx>PVO_OFFSET+1 && idx<=PVO_OFFSET+PVO_LEN-1; }
+function valAt(arr, offset, idx){
+  const pos = idx-offset;
+  if(pos<0 || pos>=arr.length) return null;
+  const v = arr[pos];
+  return (v===undefined)? null : v;
+}
+function windowSum(arr, offset){
+  let s=0;
+  for(let idx=PVO_OFFSET; idx<PVO_OFFSET+PVO_LEN; idx++){
+    const v = valAt(arr, offset, idx);
+    if(v!==null) s+=v;
+  }
+  return s;
+}
+
+/* llave estable (vendedor+cliente+item), independiente del orden/posición de fila,
+   para que las capturas guardadas sobrevivan a una recarga de Excel */
+function llaveOf(rowIndex){
+  const r = DATA.rows[rowIndex];
+  return DATA.vend[r[0]]+'||'+DATA.cli[r[1]]+'||'+r[2];
+}
+
+/* ---- state ---- */
+let projections = {};      // llave -> {pvo:[len], updatedBy, updatedAt, ...} (mantenido en vivo por Firestore)
+let unsubscribeProyecciones = null;
+let currentVendIdx = '';
+let filters = {cliente: '', q:''};
+let showHistorico=false;
+let page=0; const PAGE_SIZE=40;
+let filteredIdx=[];
+let currentDetailRow=null;
+
+/* suscripción en tiempo real a la colección 'proyecciones' de Firestore.
+   Un documento por combinación vendedor·cliente·artículo (llave), así
+   que dos comerciales pueden guardar filas distintas sin pisarse, y los
+   cambios de cualquiera aparecen solos en la pantalla de los demás. */
+function subscribeProyecciones(){
+  if(unsubscribeProyecciones){ unsubscribeProyecciones(); unsubscribeProyecciones=null; }
+  let query = db.collection('proyecciones');
+  if(loggedUser.rol!=='admin' && loggedUser.zona){
+    query = query.where('zona','==', loggedUser.zona);
+  }
+  unsubscribeProyecciones = query.onSnapshot(snapshot=>{
+    snapshot.docChanges().forEach(change=>{
+      if(change.type==='removed') delete projections[change.doc.id];
+      else projections[change.doc.id] = change.doc.data();
+    });
+    refresh();
+  }, err=>{
+    console.error('Error en la suscripción de proyecciones:', err);
+  });
+}
+
+function pvoOf(rowIndex){
+  const row = DATA.rows[rowIndex];
+  const proj = projections[llaveOf(rowIndex)];
+  return proj && proj.pvo ? proj.pvo : row[9];
+}
+function fmt(n){
+  if(n===null || n===undefined) return '—';
+  n = Math.round(n);
+  return n.toLocaleString('es-CO');
+}
+function pct(a,b){ if(!b) return null; return (a/b)*100; }
+
+/* ---- filtros ---- */
+function refreshClienteOptions(){
+  const dl = document.getElementById('dlCliente');
+  if(!DATA){ dl.innerHTML=''; return; }
+  const cliSet = new Set();
+  DATA.rows.forEach(r=>{
+    if(currentVendIdx!=='' && r[0]!=Number(currentVendIdx)) return;
+    cliSet.add(r[1]);
+  });
+  const disponibles = Array.from(cliSet).map(i=>DATA.cli[i]).sort((a,b)=>a.localeCompare(b));
+  dl.innerHTML = disponibles.map(c=>`<option value="${c}">`).join('');
+}
+
+function populateFilterSelects(){
+  const selV = document.getElementById('selVendedor');
+  selV.innerHTML = '<option value="">Todos (vista supervisor)</option>' +
+    DATA.vend.map((v,i)=>`<option value="${i}">${v}</option>`).join('');
+}
+
+let filterListenersBound = false;
+function bindFilterListeners(){
+  if(filterListenersBound) return;
+  filterListenersBound = true;
+  const selV = document.getElementById('selVendedor');
+  selV.addEventListener('change', e=>{
+    currentVendIdx = e.target.value;
+    filters.cliente = '';
+    document.getElementById('inpCliente').value = '';
+    refreshClienteOptions();
+    page=0; refresh();
+  });
+  document.getElementById('inpCliente').addEventListener('input', e=>{ filters.cliente = e.target.value.trim().toLowerCase(); page=0; refresh(); });
+  document.getElementById('inpBuscar').addEventListener('input', e=>{ filters.q = e.target.value.trim().toLowerCase(); page=0; refresh(); });
+  document.getElementById('btnLimpiar').addEventListener('click', ()=>{
+    filters = {cliente:'',q:''};
+    document.getElementById('inpCliente').value='';
+    document.getElementById('inpBuscar').value='';
+    page=0; refresh();
+  });
+  document.getElementById('btnExport').addEventListener('click', exportCSV);
+  document.getElementById('btnClose').addEventListener('click', closeModal);
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  document.getElementById('btnGuardar').addEventListener('click', saveDetail);
+  document.getElementById('btnToggleHist').addEventListener('click', ()=>{
+    showHistorico = !showHistorico;
+    document.getElementById('btnToggleHist').textContent = showHistorico
+      ? 'ocultar histórico'
+      : `mostrar histórico (${MASTER_MONTHS[0].label} a ${MASTER_MONTHS[PVO_OFFSET-1].label})`;
+    renderGrid();
+  });
+  document.getElementById('overlay').addEventListener('click', e=>{ if(e.target.id==='overlay') closeModal(); });
+}
+
+/* ---- filtrado ---- */
+function computeFiltered(){
+  if(!DATA) return [];
+  const out=[];
+  for(let i=0;i<DATA.rows.length;i++){
+    const r = DATA.rows[i];
+    if(currentVendIdx!=='' && r[0]!=Number(currentVendIdx)) continue;
+    if(filters.cliente && !DATA.cli[r[1]].toLowerCase().includes(filters.cliente)) continue;
+    if(filters.q){
+      const hay = (r[2]+' '+r[3]).toLowerCase();
+      if(!hay.includes(filters.q)) continue;
+    }
+    out.push(i);
+  }
+  return out;
+}
+
+/* ---- KPIs ---- */
+function renderKPIs(){
+  const bar = document.getElementById('kpiBar');
+  let totalAA=0, totalPPTO=0, totalSug=0, totalProy=0, nPend=0, nEdit=0;
+  filteredIdx.forEach(i=>{
+    const r = DATA.rows[i];
+    totalAA += r[6].slice(0,12).reduce((a,b)=>a+(b||0),0);
+    totalPPTO += windowSum(r[7], PPTO_OFFSET);
+    totalSug += windowSum(r[8], SUG_OFFSET);
+    const pvo = pvoOf(i);
+    const fs = windowSum(pvo, PVO_OFFSET);
+    totalProy += fs;
+    if(fs===0) nPend++;
+    if(projections[llaveOf(i)]) nEdit++;
+  });
+  const pctPPTO = pct(totalProy, totalPPTO);
+  const rows = filteredIdx.length;
+  const pctCaptura = rows? (nEdit/rows*100) : 0;
+  const cumplBarCls = pctPPTO===null? '' : (pctPPTO>=90 && pctPPTO<=110? '' : (pctPPTO<90? 'bad':'warn'));
+  bar.innerHTML = `
+    <div class="kpi accent"><div class="lbl">Cliente × Artículo en vista</div><div class="val">${fmt(rows)}</div><div class="sub">${nEdit} capturados · ${nPend} sin proyección</div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pctCaptura}%"></div></div>
+    </div>
+    <div class="kpi"><div class="lbl">Venta año anterior (AA 2025)</div><div class="val">${fmt(totalAA)}</div><div class="sub">unidades, 12 meses</div></div>
+    <div class="kpi"><div class="lbl">PPTO ciclo PVO ${VEN_META.cycle_month}</div><div class="val">${fmt(totalPPTO)}</div><div class="sub">${MASTER_MONTHS[PVO_OFFSET].label} a ${MASTER_MONTHS[PVO_OFFSET+PVO_LEN-1].label}</div></div>
+    <div class="kpi"><div class="lbl">Sugerido estadístico ciclo</div><div class="val">${fmt(totalSug)}</div><div class="sub">modelo, referencia</div></div>
+    <div class="kpi accent"><div class="lbl">Tu proyección del ciclo</div><div class="val">${fmt(totalProy)}</div>
+      <div class="sub">${pctPPTO===null? '—' : (pctPPTO>=90 && pctPPTO<=110? '<span style="color:var(--good)">'+pctPPTO.toFixed(0)+'% del PPTO</span>' : (pctPPTO<90? '<span style="color:var(--bad)">'+pctPPTO.toFixed(0)+'% del PPTO</span>' : '<span style="color:var(--warn)">'+pctPPTO.toFixed(0)+'% del PPTO</span>'))}</div>
+      <div class="progress-track"><div class="progress-fill ${cumplBarCls}" style="width:${pctPPTO===null?0:Math.min(100,Math.max(0,pctPPTO))}%"></div></div>
+    </div>
+  `;
+}
+
+/* ---- tabla ---- */
+function renderTable(){
+  const tbody = document.getElementById('tbody');
+  const start = page*PAGE_SIZE;
+  const pageIdx = filteredIdx.slice(start,start+PAGE_SIZE);
+  tbody.innerHTML = pageIdx.map(i=>{
+    const r = DATA.rows[i];
+    const totalAA = r[6].slice(0,12).reduce((a,b)=>a+(b||0),0);
+    const totalPPTO = windowSum(r[7], PPTO_OFFSET);
+    const totalSug = windowSum(r[8], SUG_OFFSET);
+    const pvo = pvoOf(i);
+    const totalProy = windowSum(pvo, PVO_OFFSET);
+    const p = pct(totalProy,totalPPTO);
+    let badge = '<span class="badge neutral">sin PPTO</span>';
+    if(p!==null){
+      if(p>=90 && p<=110) badge = `<span class="badge good">${p.toFixed(0)}%</span>`;
+      else if(p<90) badge = `<span class="badge bad">${p.toFixed(0)}%</span>`;
+      else badge = `<span class="badge warn">${p.toFixed(0)}%</span>`;
+    }
+    const rowClass = projections[llaveOf(i)] ? 'edited' : (totalProy===0 ? 'pending' : '');
+    return `<tr class="${rowClass}" data-row="${i}" onclick="openDetail(${i})" title="Clic para capturar tu proyección">
+      <td class="cli-cell" title="${DATA.cli[r[1]]}">${DATA.cli[r[1]]}</td>
+      <td class="item-cell"><div class="nm">${r[3]}</div><div class="id">${r[2]}</div></td>
+      <td class="num">${fmt(totalAA)}</td>
+      <td class="num">${fmt(totalPPTO)}</td>
+      <td class="num">${fmt(totalSug)}</td>
+      <td class="num">${fmt(totalProy)}</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rowCount').textContent = `${filteredIdx.length.toLocaleString('es-CO')} combinaciones vendedor·cliente·artículo`;
+  renderPagination();
+}
+function renderPagination(){
+  const totalPages = Math.max(1, Math.ceil(filteredIdx.length/PAGE_SIZE));
+  const p = document.getElementById('pagination');
+  p.innerHTML = `
+    <button ${page<=0?'disabled':''} onclick="gotoPage(${page-1})">&larr; Anterior</button>
+    <span>Página ${page+1} de ${totalPages}</span>
+    <button ${page>=totalPages-1?'disabled':''} onclick="gotoPage(${page+1})">Siguiente &rarr;</button>
+  `;
+}
+function gotoPage(n){ page=n; renderTable(); }
+
+function refresh(){
+  const emptyState = document.getElementById('emptyState');
+  const dataArea = document.getElementById('dataArea');
+  if(!DATA){
+    emptyState.style.display='block';
+    dataArea.style.display='none';
+    document.getElementById('hintBox').textContent='';
+    return;
+  }
+  emptyState.style.display='none';
+  dataArea.style.display='block';
+
+  filteredIdx = computeFiltered();
+  const vendLabel = currentVendIdx===''? 'todas las zonas (vista supervisor)' : DATA.vend[currentVendIdx];
+  document.getElementById('hintBox').innerHTML =
+    `Capturando para <b>${vendLabel}</b> · <b>Ciclo PVO ${VEN_META.cycle_month}</b>. Los meses anteriores a <b>${MASTER_MONTHS[PVO_OFFSET].label}</b> son histórico de venta real. <b>${MASTER_MONTHS[PVO_OFFSET].label} y ${MASTER_MONTHS[PVO_OFFSET+1].label}</b> quedan congelados (ya en ejecución). Puedes colaborar desde <b>${MASTER_MONTHS[PVO_OFFSET+2].label}</b> hasta <b>${MASTER_MONTHS[PVO_OFFSET+PVO_LEN-1].label}</b>. Los cambios se guardan de forma compartida para todo el equipo.`;
+  renderKPIs();
+  renderTable();
+  refreshFechaLimiteBanner();
+}
+
+/* ---- modal detalle ---- */
+function estadoLabel(estado){
+  if(estado==='aprobado') return 'Aprobado';
+  if(estado==='devuelto') return 'Devuelto';
+  return 'Pendiente';
+}
+
+function openDetail(rowIndex){
+  currentDetailRow = rowIndex;
+  const r = DATA.rows[rowIndex];
+  document.getElementById('mTitle').textContent = r[3];
+  document.getElementById('mMeta').textContent = `${r[2]}  ·  Cliente: ${DATA.cli[r[1]]}  ·  Zona: ${DATA.vend[r[0]]}`;
+  document.getElementById('mTags').innerHTML = `
+    <span class="tag">Peso ${r[4]} kg/u</span>
+  `;
+  checkAndShowDraft(rowIndex);
+  showHistorico=false;
+  document.getElementById('btnToggleHist').textContent = `mostrar histórico (${MASTER_MONTHS[0].label} a ${MASTER_MONTHS[PVO_OFFSET-1].label})`;
+  renderMiniChart(rowIndex);
+  renderGrid();
+
+  const proj = projections[llaveOf(rowIndex)];
+  const estado = proj ? (proj.estado || 'pendiente') : 'pendiente';
+  const badge = document.getElementById('estadoBadge');
+  badge.style.display = 'inline-block';
+  badge.className = 'estado-badge '+estado;
+  badge.textContent = estadoLabel(estado);
+
+  const devBanner = document.getElementById('devueltoBanner');
+  if(estado==='devuelto' && proj && proj.comentario){
+    devBanner.style.display='block';
+    devBanner.innerHTML = `<b>Devuelto por el supervisor:</b> ${proj.comentario}`;
+  } else {
+    devBanner.style.display='none';
+  }
+
+  document.getElementById('inpComentario').value = proj ? (proj.comentario||'') : '';
+
+  // historial
+  const histSection = document.getElementById('historialSection');
+  const histBox = document.getElementById('historialBox');
+  const histBtn = document.getElementById('btnToggleHistorial');
+  if(proj && proj.historial && proj.historial.length){
+    histSection.style.display='block';
+    histBtn.textContent = 'ver historial de cambios ('+proj.historial.length+')';
+    histBox.style.display='none';
+    const reversedHist = proj.historial.slice().reverse();
+    histBox.innerHTML = reversedHist.map((h,hi)=>{
+      const total = (h.pvo||[]).reduce((a,b)=>a+(b||0),0);
+      return `<div class="hist-entry">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span><b>${h.updatedBy||'—'}</b> · ${new Date(h.updatedAt).toLocaleString('es-CO')} · total capturado: ${fmt(total)}${h.comentario? '<br><i>"'+h.comentario+'"</i>':''}</span>
+          <button class="chip-btn" data-histidx="${hi}">Restaurar esta versión</button>
+        </div>
+      </div>`;
+    }).join('');
+    histBox.querySelectorAll('button[data-histidx]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const h = reversedHist[Number(btn.dataset.histidx)];
+        document.querySelectorAll('#gridTable input.pvo-input:not([disabled])').forEach(inp=>{
+          const midx = Number(inp.dataset.midx);
+          const pos = midx-PVO_OFFSET;
+          const v = h.pvo[pos];
+          if(v!==undefined && v!==null){
+            inp.value = v;
+            inp.dispatchEvent(new Event('input', {bubbles:true}));
+          }
+        });
+        if(h.comentario!==undefined) document.getElementById('inpComentario').value = h.comentario;
+        document.getElementById('saveStatus').innerHTML = '<span style="color:var(--warn);">Versión cargada en el formulario — revisa y dale "Guardar proyección" para confirmarla.</span>';
+      });
+    });
+  } else {
+    histSection.style.display='none';
+  }
+
+  // panel de aprobación: visible en modo administrador, o para un supervisor
+  // de zona revisando un artículo de SU propia zona
+  const esSupervisorDeEstaZona = loggedUser && loggedUser.rol==='supervisor' && DATA.vend[r[0]]===loggedUser.zona;
+  const puedeAprobar = adminUnlocked || esSupervisorDeEstaZona;
+  const approvalSection = document.getElementById('adminApprovalSection');
+  approvalSection.style.display = puedeAprobar ? 'block' : 'none';
+  document.getElementById('btnReabrir').style.display = (estado==='aprobado') ? 'inline-block' : 'none';
+  document.getElementById('btnAprobar').style.display = (estado!=='aprobado') ? 'inline-block' : 'none';
+  document.getElementById('btnDevolver').style.display = (estado!=='aprobado') ? 'inline-block' : 'none';
+
+  // si está aprobado y no eres admin/supervisor, se bloquea la edición
+  const locked = (estado==='aprobado' && !puedeAprobar);
+  document.getElementById('btnGuardar').style.display = locked ? 'none' : 'inline-block';
+  document.getElementById('inpComentario').disabled = locked;
+
+  document.getElementById('saveStatus').textContent = proj
+    ? `Última captura: ${proj.updatedBy||'—'} · ${new Date(proj.updatedAt).toLocaleString('es-CO')}`
+    : 'Sin captura previa para esta combinación.';
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('overlay').classList.remove('show');
+  currentDetailRow=null;
+}
+document.getElementById('btnToggleHistorial').addEventListener('click', ()=>{
+  const box = document.getElementById('historialBox');
+  const btn = document.getElementById('btnToggleHistorial');
+  const showing = box.style.display==='block';
+  box.style.display = showing? 'none':'block';
+  btn.textContent = btn.textContent.replace(showing?'ocultar':'ver', showing?'ver':'ocultar');
+});
+
+document.getElementById('inpComentario').addEventListener('input', ()=>{}); // placeholder, valor se lee al guardar
+
+document.getElementById('btnCopyPpto').addEventListener('click', ()=> quickFill('ppto'));
+document.getElementById('btnCopySug').addEventListener('click', ()=> quickFill('sug'));
+function quickFill(kind){
+  const rowIndex = currentDetailRow;
+  if(rowIndex===null) return;
+  const r = DATA.rows[rowIndex];
+  const srcArr = kind==='ppto' ? r[7] : r[8];
+  const srcOffset = kind==='ppto' ? PPTO_OFFSET : SUG_OFFSET;
+  document.querySelectorAll('#gridTable input.pvo-input:not([disabled])').forEach(inp=>{
+    const midx = Number(inp.dataset.midx);
+    const v = valAt(srcArr, srcOffset, midx);
+    if(v!==null){
+      inp.value = v;
+      inp.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+  });
+}
+
+async function setEstado(rowIndex, nuevoEstado){
+  const status = document.getElementById('saveStatus');
+  try{
+    const key = llaveOf(rowIndex);
+    if(!projections[key]){ status.innerHTML = '<span style="color:var(--bad);">No hay una captura guardada para cambiar de estado.</span>'; return; }
+    const update = {
+      estado: nuevoEstado,
+      comentario: document.getElementById('inpComentario').value.trim(),
+      reviewedBy: currentUserName,
+      reviewedAt: new Date().toISOString()
+    };
+    await db.collection('proyecciones').doc(key).update(update);
+    projections[key] = Object.assign({}, projections[key], update);
+    refresh();
+    openDetail(rowIndex);
+  }catch(e){
+    status.innerHTML = '<span style="color:var(--bad);">Error: '+e.message+'</span>';
+  }
+}
+document.getElementById('btnAprobar').addEventListener('click', ()=> setEstado(currentDetailRow, 'aprobado'));
+document.getElementById('btnDevolver').addEventListener('click', ()=> setEstado(currentDetailRow, 'devuelto'));
+document.getElementById('btnReabrir').addEventListener('click', ()=> setEstado(currentDetailRow, 'pendiente'));
+
+function renderMiniChart(rowIndex, pvoOverride){
+  const r = DATA.rows[rowIndex];
+  const pvo = pvoOverride || pvoOf(rowIndex);
+  const cols = MASTER_MONTHS;
+  const maxVal = Math.max(1, ...cols.map(m=>{
+    const a = valAt(r[7],PPTO_OFFSET,m.idx)||0;
+    const b = valAt(r[8],SUG_OFFSET,m.idx)||0;
+    const c = valAt(pvo,PVO_OFFSET,m.idx)||0;
+    const d = valAt(r[6],VEN_OFFSET,m.idx)||0;
+    return Math.max(a,b,c,d);
+  }));
+  const el = document.getElementById('miniChart');
+  el.innerHTML = cols.map(m=>{
+    const vVenta = valAt(r[6],VEN_OFFSET,m.idx);
+    const vPpto = valAt(r[7],PPTO_OFFSET,m.idx);
+    const vSug = valAt(r[8],SUG_OFFSET,m.idx);
+    const vProy = valAt(pvo,PVO_OFFSET,m.idx);
+    const hVenta = Math.round(((vVenta||0)/maxVal)*74);
+    const hPpto = Math.round(((vPpto||0)/maxVal)*74);
+    const hSug = Math.round(((vSug||0)/maxVal)*74);
+    const hProy = Math.round(((vProy||0)/maxVal)*74);
+    const cls = classify(m.idx);
+    const muted = cls==='past' ? 'mc-past' : '';
+    const lock = cls==='frozen' ? ' &#128274;':'';
+    const ventaBar = vVenta!==null ? `<div class="mc-bar venta" style="height:${Math.max(2,hVenta)}px" title="Venta real ${fmt(vVenta)}"></div>` : '';
+    return `<div class="mc-col ${muted}">
+      <div class="mc-bars">
+        ${ventaBar}
+        <div class="mc-bar ppto" style="height:${Math.max(2,hPpto)}px" title="PPTO ${fmt(vPpto)}"></div>
+        <div class="mc-bar sug" style="height:${Math.max(2,hSug)}px" title="Sugerido ${fmt(vSug)}"></div>
+        <div class="mc-bar proy" style="height:${Math.max(2,hProy)}px" title="Proyección ${fmt(vProy)}"></div>
+      </div>
+      <div class="mc-label">${m.label}${lock}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderGrid(){
+  const rowIndex = currentDetailRow;
+  const r = DATA.rows[rowIndex];
+  const pvo = pvoOf(rowIndex).slice();
+  const fromIdx = showHistorico? 0 : PVO_OFFSET;
+  const cols = MASTER_MONTHS.slice(fromIdx);
+
+  let html = '<thead><tr><th class="rowlabel">Mes</th>';
+  cols.forEach(m=>{
+    const cls = classify(m.idx);
+    html += `<th class="${cls}">${m.label}${cls==='frozen'?' <span class="lock-ico" title="Congelado: ya en ejecución, no editable">&#128274;</span>':''}</th>`;
+  });
+  html += `<th>Total ciclo PVO ${VEN_META.cycle_month}</th></tr></thead><tbody>`;
+
+  function dataRow(label, arr, offset){
+    let row = `<tr><td class="rowlabel">${label}</td>`;
+    cols.forEach(m=>{
+      const v = valAt(arr, offset, m.idx);
+      row += `<td class="num ${classify(m.idx)}">${fmt(v)}</td>`;
+    });
+    row += `<td class="num">${fmt(windowSum(arr, offset))}</td></tr>`;
+    return row;
+  }
+  html += dataRow('Venta real', r[6], VEN_OFFSET);
+  html += dataRow('PPTO', r[7], PPTO_OFFSET);
+  html += dataRow('Sugerido estadístico', r[8], SUG_OFFSET);
+
+  const projEntry = projections[llaveOf(rowIndex)];
+  const savedPvo = projEntry ? projEntry.pvo : null;
+  const esSupervisorDeEstaZona = loggedUser && loggedUser.rol==='supervisor' && DATA.vend[r[0]]===loggedUser.zona;
+  const lockedByApproval = (projEntry && projEntry.estado==='aprobado' && !adminUnlocked && !esSupervisorDeEstaZona);
+  let editRow = `<tr><td class="rowlabel">Tu proyección</td>`;
+  cols.forEach(m=>{
+    const refVal = valAt(r[9], PVO_OFFSET, m.idx);
+    const cls = classify(m.idx);
+    if(refVal===null){
+      editRow += `<td class="num ${cls}">—</td>`;
+    } else if(!isEditable(m.idx) || lockedByApproval){
+      const v = valAt(pvo, PVO_OFFSET, m.idx);
+      editRow += `<td class="num ${cls}"><input type="text" class="pvo-input ${cls}" data-midx="${m.idx}" value="${v}" disabled></td>`;
+    } else {
+      const savedVal = savedPvo ? valAt(savedPvo, PVO_OFFSET, m.idx) : null;
+      const filled = savedVal!==null && savedVal!==undefined;
+      const fillCls = filled ? 'filled' : 'pending';
+      editRow += `<td class="num ${cls}"><input type="text" inputmode="numeric" class="pvo-input ${fillCls}" data-midx="${m.idx}" value="${filled?savedVal:''}" placeholder="${refVal}" title="Referencia (ciclo anterior): ${refVal}"></td>`;
+    }
+  });
+  editRow += `<td class="num" id="gridFutureTotal">${fmt(windowSum(pvo, PVO_OFFSET))}</td></tr>`;
+  html += editRow;
+
+  function buildDiffRow(label, refArr, refOffset){
+    let row = `<tr class="total diff-row"><td class="rowlabel">${label}</td>`;
+    cols.forEach(m=>{
+      const vPvo = valAt(pvo, PVO_OFFSET, m.idx);
+      const vRef = valAt(refArr, refOffset, m.idx);
+      if(vPvo===null || vRef===null){
+        row += `<td class="num">—</td>`;
+      } else {
+        const d = vPvo - vRef;
+        const cls = d===0? '' : (d>0? 'diff-good':'diff-bad');
+        row += `<td class="num ${cls}">${d>0?'+':''}${fmt(d)}</td>`;
+      }
+    });
+    const totalDiff = windowSum(pvo,PVO_OFFSET) - windowSum(refArr,refOffset);
+    row += `<td class="num ${totalDiff>0?'diff-good':(totalDiff<0?'diff-bad':'')}">${totalDiff>0?'+':''}${fmt(totalDiff)}</td></tr>`;
+    return row;
+  }
+  html += buildDiffRow('Diferencia vs PPTO', r[7], PPTO_OFFSET);
+  html += buildDiffRow('Diferencia vs Sugerido', r[8], SUG_OFFSET);
+  html += '</tbody>';
+  document.getElementById('gridTable').innerHTML = html;
+
+  function refreshDiffRows(){
+    const diffRows = document.querySelectorAll('#gridTable tr.diff-row');
+    const refs = [ [r[7],PPTO_OFFSET], [r[8],SUG_OFFSET] ];
+    diffRows.forEach((rowEl, ri)=>{
+      const [refArr, refOffset] = refs[ri];
+      const cells = rowEl.querySelectorAll('td.num');
+      cols.forEach((m,ci)=>{
+        const vPvo = valAt(pvo, PVO_OFFSET, m.idx);
+        const vRef = valAt(refArr, refOffset, m.idx);
+        const cell = cells[ci];
+        if(!cell) return;
+        if(vPvo===null || vRef===null){ cell.textContent='—'; cell.className='num'; }
+        else{
+          const d = vPvo-vRef;
+          cell.textContent = (d>0?'+':'')+fmt(d);
+          cell.className = 'num '+(d>0?'diff-good':(d<0?'diff-bad':''));
+        }
+      });
+      const totalCell = cells[cells.length-1];
+      if(totalCell){
+        const td = windowSum(pvo,PVO_OFFSET)-windowSum(refArr,refOffset);
+        totalCell.textContent = (td>0?'+':'')+fmt(td);
+        totalCell.className = 'num '+(td>0?'diff-good':(td<0?'diff-bad':''));
+      }
+    });
+  }
+
+  document.querySelectorAll('#gridTable input.pvo-input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const midx = Number(inp.dataset.midx);
+      const raw = inp.value.trim();
+      let v = parseFloat(raw.replace(/[^0-9.\-]/g,''))||0;
+      const pos = midx-PVO_OFFSET;
+      pvo[pos]=v;
+      if(raw===''){ inp.classList.remove('filled'); inp.classList.add('pending'); }
+      else{ inp.classList.remove('pending','missing'); inp.classList.add('filled'); }
+
+      // alerta de valor atípico (>=60% de diferencia contra PPTO o Sugerido de ese mes)
+      const refPpto = valAt(r[7], PPTO_OFFSET, midx);
+      const refSug = valAt(r[8], SUG_OFFSET, midx);
+      let isOutlier = false, refMsg=[];
+      [['PPTO',refPpto],['Sugerido',refSug]].forEach(([lbl,ref])=>{
+        if(ref!==null && ref>0 && raw!==''){
+          const diffPct = Math.abs(v-ref)/ref;
+          if(diffPct>=0.6){ isOutlier=true; refMsg.push(`${lbl}: ${fmt(ref)}`); }
+        }
+      });
+      inp.classList.toggle('outlier', isOutlier);
+      inp.title = isOutlier ? `Muy distinto a la referencia (${refMsg.join(', ')})` : (raw===''? '' : inp.title);
+
+      document.getElementById('gridFutureTotal').textContent = fmt(windowSum(pvo, PVO_OFFSET));
+      refreshDiffRows();
+      renderMiniChart(rowIndex, pvo);
+      scheduleDraftSave(rowIndex, pvo);
+    });
+    inp.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        document.getElementById('btnGuardar').click();
+      }
+    });
+  });
+}
+
+/* ---- validación y guardado ---- */
+function validateAllFilled(){
+  const inputs = document.querySelectorAll('#gridTable input.pvo-input:not([disabled])');
+  let allFilled = true;
+  inputs.forEach(inp=>{
+    if(inp.value.trim()===''){ allFilled=false; inp.classList.add('missing'); }
+    else{ inp.classList.remove('missing'); }
+  });
+  return allFilled;
+}
+function collectPvoFromInputs(){
+  const inputs = document.querySelectorAll('#gridTable input.pvo-input');
+  const arr = new Array(PVO_LEN).fill(0);
+  inputs.forEach(inp=>{
+    const midx = Number(inp.dataset.midx);
+    const pos = midx-PVO_OFFSET;
+    const v = parseFloat(inp.value.replace(/[^0-9.\-]/g,''));
+    arr[pos] = isNaN(v) ? 0 : v;
+  });
+  return arr;
+}
+/* ---- borrador automático (personal, recuperable si se cierra sin guardar) ---- */
+let draftTimers = {};
+function scheduleDraftSave(rowIndex, pvo){
+  clearTimeout(draftTimers[rowIndex]);
+  draftTimers[rowIndex] = setTimeout(()=>{ saveDraft(rowIndex, pvo); }, 800);
+}
+async function saveDraft(rowIndex, pvo){
+  try{
+    const key = 'draft__'+llaveOf(rowIndex);
+    const comentario = document.getElementById('inpComentario').value;
+    await STORAGE.set(key, JSON.stringify({pvo, comentario, savedAt:new Date().toISOString()}), false);
+  }catch(e){}
+}
+async function loadDraft(rowIndex){
+  try{
+    const key = 'draft__'+llaveOf(rowIndex);
+    const res = await STORAGE.get(key, false);
+    if(res && res.value) return JSON.parse(res.value);
+  }catch(e){}
+  return null;
+}
+async function clearDraft(rowIndex){
+  try{ await STORAGE.delete('draft__'+llaveOf(rowIndex), false); }catch(e){}
+}
+async function checkAndShowDraft(rowIndex){
+  const banner = document.getElementById('draftBanner');
+  const draft = await loadDraft(rowIndex);
+  const proj = projections[llaveOf(rowIndex)];
+  const draftIsNewer = draft && (!proj || new Date(draft.savedAt) > new Date(proj.updatedAt));
+  if(!draftIsNewer){ banner.style.display='none'; return; }
+  banner.style.display='flex';
+  banner.innerHTML = `
+    <span>Tienes un borrador sin guardar de ${new Date(draft.savedAt).toLocaleString('es-CO')}.</span>
+    <span><button class="primary" id="btnDraftRecuperar">Recuperar</button> <button id="btnDraftDescartar">Descartar</button></span>
+  `;
+  document.getElementById('btnDraftRecuperar').addEventListener('click', ()=>{
+    document.querySelectorAll('#gridTable input.pvo-input:not([disabled])').forEach(inp=>{
+      const midx = Number(inp.dataset.midx);
+      const pos = midx-PVO_OFFSET;
+      const v = draft.pvo[pos];
+      if(v!==undefined && v!==null){
+        inp.value = v;
+        inp.dispatchEvent(new Event('input', {bubbles:true}));
+      }
+    });
+    if(draft.comentario) document.getElementById('inpComentario').value = draft.comentario;
+    banner.style.display='none';
+  });
+  document.getElementById('btnDraftDescartar').addEventListener('click', async ()=>{
+    await clearDraft(rowIndex);
+    banner.style.display='none';
+  });
+}
+
+async function saveDetail(){
+  const rowIndex = currentDetailRow;
+  if(rowIndex===null) return;
+  const status = document.getElementById('saveStatus');
+  const key = llaveOf(rowIndex);
+  const existing = projections[key];
+  const esSupervisorDeEstaZona = loggedUser && loggedUser.rol==='supervisor' && DATA.vend[DATA.rows[rowIndex][0]]===loggedUser.zona;
+  if(existing && existing.estado==='aprobado' && !adminUnlocked && !esSupervisorDeEstaZona){
+    status.innerHTML = '<span style="color:var(--bad);font-weight:700;">Esta proyección ya fue aprobada por el supervisor y quedó bloqueada. Pídele que la reabra si necesitas cambiarla.</span>';
+    return;
+  }
+  if(!validateAllFilled()){
+    status.innerHTML = `<span style="color:var(--bad);font-weight:700;">Faltan meses por diligenciar (resaltados en rojo). Completa los ${PVO_LEN-2} meses editables del ciclo antes de guardar.</span>`;
+    return;
+  }
+  const pvo = collectPvoFromInputs();
+  const comentario = document.getElementById('inpComentario').value.trim();
+  const r = DATA.rows[rowIndex];
+  status.textContent = 'Guardando...';
+  try{
+    const previous = projections[key]; // caché local, mantenida en vivo por la suscripción de Firestore
+    const historial = previous ? (previous.historial || []).slice(-9) : [];
+    if(previous){
+      historial.push({ pvo:previous.pvo, updatedBy:previous.updatedBy, updatedAt:previous.updatedAt, comentario:previous.comentario||'' });
+    }
+    const docData = {
+      pvo: pvo,
+      updatedBy: currentUserName || 'Comercial',
+      updatedAt: new Date().toISOString(),
+      comentario: comentario,
+      estado: 'pendiente',
+      historial: historial,
+      zona: DATA.vend[r[0]],
+      cliente: DATA.cli[r[1]],
+      itemId: r[2]
+    };
+    await db.collection('proyecciones').doc(key).set(docData);
+    projections[key] = docData; // reflejo optimista; la suscripción confirma el mismo valor al instante
+    await clearDraft(rowIndex);
+    status.textContent = 'Guardado correctamente (compartido con todo el equipo, en tiempo real).';
+    refresh();
+    setTimeout(closeModal, 600);
+  }catch(e){
+    status.textContent = 'Error al guardar: '+e.message;
+  }
+}
+/* ---- export ---- */
+function exportCSV(){
+  const cycleLabels = MASTER_MONTHS.slice(PVO_OFFSET, PVO_OFFSET+PVO_LEN).map(m=>m.label);
+  const header = ['Zona','Cliente','Item_ID','Articulo','AA_2025_total','PPTO_ciclo','Sugerido_ciclo','Proyeccion_ciclo_total', ...cycleLabels];
+  const lines = [header.join(';')];
+  filteredIdx.forEach(i=>{
+    const r = DATA.rows[i];
+    const pvo = pvoOf(i);
+    const row = [
+      DATA.vend[r[0]], DATA.cli[r[1]], r[2], '"'+r[3].replace(/"/g,'')+'"',
+      r[6].slice(0,12).reduce((a,b)=>a+(b||0),0), windowSum(r[7],PPTO_OFFSET), windowSum(r[8],SUG_OFFSET), windowSum(pvo,PVO_OFFSET),
+      ...pvo.map(v=>v||0)
+    ];
+    lines.push(row.join(';'));
+  });
+  const csv = lines.join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'proyeccion_comercial.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* =====================================================================
+   CAPTURA MASIVA POR CLIENTE
+   ===================================================================== */
+/* =====================================================================
+   BUSCADOR RÁPIDO (Ctrl+K / Cmd+K)
+   ===================================================================== */
+function openQuickSearch(){
+  if(!DATA) return;
+  document.getElementById('quickSearchOverlay').classList.add('show');
+  const inp = document.getElementById('quickSearchInput');
+  inp.value='';
+  document.getElementById('quickSearchResults').innerHTML = '<div class="qs-empty">Escribe para buscar...</div>';
+  setTimeout(()=> inp.focus(), 30);
+}
+function closeQuickSearch(){ document.getElementById('quickSearchOverlay').classList.remove('show'); }
+function renderQuickSearchResults(q){
+  const box = document.getElementById('quickSearchResults');
+  if(!q){ box.innerHTML = '<div class="qs-empty">Escribe para buscar...</div>'; return; }
+  const ql = q.toLowerCase();
+  const matches = [];
+  for(let i=0;i<DATA.rows.length && matches.length<20;i++){
+    const r = DATA.rows[i];
+    if(currentVendIdx!=='' && r[0]!=Number(currentVendIdx)) continue;
+    const hay = (r[3]+' '+r[2]+' '+DATA.cli[r[1]]).toLowerCase();
+    if(hay.includes(ql)) matches.push(i);
+  }
+  if(!matches.length){ box.innerHTML = '<div class="qs-empty">Sin resultados.</div>'; return; }
+  box.innerHTML = matches.map(i=>{
+    const r = DATA.rows[i];
+    return `<div class="qs-result" data-rowidx="${i}">
+      <div><div class="qs-name">${r[3]}</div><div class="qs-meta">${r[2]} · ${DATA.cli[r[1]]} · ${DATA.vend[r[0]]}</div></div>
+    </div>`;
+  }).join('');
+  box.querySelectorAll('.qs-result').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const rowIdx = Number(el.dataset.rowidx);
+      closeQuickSearch();
+      openDetail(rowIdx);
+    });
+  });
+}
+document.getElementById('quickSearchInput').addEventListener('input', e=> renderQuickSearchResults(e.target.value.trim()));
+document.getElementById('quickSearchOverlay').addEventListener('click', e=>{ if(e.target.id==='quickSearchOverlay') closeQuickSearch(); });
+document.addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){
+    e.preventDefault();
+    if(document.getElementById('appRoot').style.display!=='none') openQuickSearch();
+  } else if(e.key==='Escape'){
+    if(document.getElementById('quickSearchOverlay').classList.contains('show')) closeQuickSearch();
+  }
+});
+
+let bulkRowIndices = [];
+function openBulkModal(){
+  document.getElementById('bulkOverlay').classList.add('show');
+  const sel = document.getElementById('bulkClienteSelect');
+  const cliSet = new Set();
+  DATA.rows.forEach(r=>{
+    if(currentVendIdx!=='' && r[0]!=Number(currentVendIdx)) return;
+    cliSet.add(r[1]);
+  });
+  const disponibles = Array.from(cliSet).map(i=>DATA.cli[i]).sort((a,b)=>a.localeCompare(b));
+  sel.innerHTML = '<option value="">Selecciona un cliente...</option>' + disponibles.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('bulkContent').innerHTML='';
+  document.getElementById('btnBulkGuardar').style.display='none';
+  document.getElementById('bulkSaveStatus').textContent='';
+}
+function closeBulkModal(){ document.getElementById('bulkOverlay').classList.remove('show'); }
+
+function renderBulkContent(clienteName){
+  bulkRowIndices = [];
+  DATA.rows.forEach((r,i)=>{
+    if(currentVendIdx!=='' && r[0]!=Number(currentVendIdx)) return;
+    if(DATA.cli[r[1]]!==clienteName) return;
+    bulkRowIndices.push(i);
+  });
+  const content = document.getElementById('bulkContent');
+  const btnGuardar = document.getElementById('btnBulkGuardar');
+  if(!bulkRowIndices.length){
+    content.innerHTML = '<p style="color:var(--ink-dim);font-size:13px;">Este cliente no tiene artículos en la zona seleccionada.</p>';
+    btnGuardar.style.display='none';
+    return;
+  }
+  const editableMonths = MASTER_MONTHS.slice(PVO_OFFSET+2, PVO_OFFSET+PVO_LEN);
+  let html = '<div class="bulk-table-wrap"><table class="bulk"><thead><tr><th>Artículo</th>';
+  editableMonths.forEach(m=> html += `<th>${m.label}</th>`);
+  html += '<th>Total</th></tr></thead><tbody>';
+  bulkRowIndices.forEach(rowIndex=>{
+    const r = DATA.rows[rowIndex];
+    const proj = projections[llaveOf(rowIndex)];
+    const savedPvo = proj ? proj.pvo : null;
+    html += `<tr data-rowidx="${rowIndex}"><td class="artname" title="${r[3]}">${r[3]}<br><span style="color:var(--ink-dim);font-size:10.5px;">${r[2]}</span></td>`;
+    editableMonths.forEach(m=>{
+      const savedVal = savedPvo ? valAt(savedPvo, PVO_OFFSET, m.idx) : null;
+      const refVal = valAt(r[9], PVO_OFFSET, m.idx);
+      const filled = savedVal!==null && savedVal!==undefined;
+      const cls = filled? 'filled':'pending';
+      html += `<td><input type="text" inputmode="numeric" class="bulk-input ${cls}" data-rowidx="${rowIndex}" data-midx="${m.idx}" value="${filled?savedVal:''}" placeholder="${refVal===null?'':refVal}"></td>`;
+    });
+    html += `<td class="num bulk-total" data-rowidx="${rowIndex}">${fmt(savedPvo? windowSum(savedPvo,PVO_OFFSET) : 0)}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+  content.innerHTML = html;
+  btnGuardar.style.display='inline-block';
+
+  content.querySelectorAll('input.bulk-input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const raw = inp.value.trim();
+      inp.classList.toggle('pending', raw==='');
+      inp.classList.toggle('filled', raw!=='');
+      inp.classList.remove('missing');
+      const rowIdx = inp.dataset.rowidx;
+      const totalCell = content.querySelector(`.bulk-total[data-rowidx="${rowIdx}"]`);
+      if(totalCell){
+        let sum=0;
+        content.querySelectorAll(`input.bulk-input[data-rowidx="${rowIdx}"]`).forEach(i2=> sum += (parseFloat(i2.value)||0));
+        totalCell.textContent = fmt(sum);
+      }
+    });
+  });
+}
+
+document.getElementById('btnBulk').addEventListener('click', openBulkModal);
+document.getElementById('btnBulkClose').addEventListener('click', closeBulkModal);
+document.getElementById('btnBulkCancel').addEventListener('click', closeBulkModal);
+document.getElementById('bulkOverlay').addEventListener('click', e=>{ if(e.target.id==='bulkOverlay') closeBulkModal(); });
+document.getElementById('bulkClienteSelect').addEventListener('change', e=>{
+  if(e.target.value) renderBulkContent(e.target.value);
+  else { document.getElementById('bulkContent').innerHTML=''; document.getElementById('btnBulkGuardar').style.display='none'; }
+});
+
+document.getElementById('btnBulkGuardar').addEventListener('click', async ()=>{
+  const status = document.getElementById('bulkSaveStatus');
+  const content = document.getElementById('bulkContent');
+  let allValid = true;
+  const perRow = {};
+  bulkRowIndices.forEach(rowIndex=>{
+    const inputs = content.querySelectorAll(`input.bulk-input[data-rowidx="${rowIndex}"]`);
+    let rowValid = true;
+    inputs.forEach(inp=>{
+      if(inp.value.trim()===''){ rowValid=false; inp.classList.add('missing'); }
+      else{ inp.classList.remove('missing'); }
+    });
+    if(!rowValid) allValid=false;
+    perRow[rowIndex] = rowValid;
+  });
+  if(!allValid){
+    status.innerHTML = '<span style="color:var(--bad);font-weight:700;">Hay artículos con meses sin diligenciar (resaltados en rojo). Complétalos o quítalos de este cliente por ahora.</span>';
+    return;
+  }
+  status.textContent = 'Guardando todo...';
+  try{
+    const batch = db.batch();
+    const updates = {};
+    bulkRowIndices.forEach(rowIndex=>{
+      const r = DATA.rows[rowIndex];
+      const pvo = pvoOf(rowIndex).slice();
+      content.querySelectorAll(`input.bulk-input[data-rowidx="${rowIndex}"]`).forEach(inp=>{
+        const midx = Number(inp.dataset.midx);
+        const pos = midx-PVO_OFFSET;
+        pvo[pos] = parseFloat(inp.value)||0;
+      });
+      const key = llaveOf(rowIndex);
+      const previous = projections[key];
+      const historial = previous ? (previous.historial||[]).slice(-9) : [];
+      if(previous) historial.push({pvo:previous.pvo, updatedBy:previous.updatedBy, updatedAt:previous.updatedAt, comentario:previous.comentario||''});
+      const docData = {
+        pvo, updatedBy: currentUserName||'Comercial', updatedAt: new Date().toISOString(),
+        comentario: previous?(previous.comentario||''):'', estado:'pendiente', historial,
+        zona: DATA.vend[r[0]], cliente: DATA.cli[r[1]], itemId: r[2]
+      };
+      batch.set(db.collection('proyecciones').doc(key), docData);
+      updates[key] = docData;
+    });
+    await batch.commit();
+    Object.assign(projections, updates);
+    refresh();
+    status.innerHTML = '<span style="color:var(--good);font-weight:700;">'+bulkRowIndices.length+' artículos guardados correctamente (compartido con todo el equipo).</span>';
+  }catch(e){
+    status.innerHTML = '<span style="color:var(--bad);">Error: '+e.message+'</span>';
+  }
+});
+
+/* ---- login real: Firebase Authentication + perfil en Firestore ---- */
+function showWelcomeToast(msg){
+  const t = document.getElementById('welcomeToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 4000);
+}
+async function doLogin(email, password){
+  const errBox = document.getElementById('loginError');
+  errBox.classList.remove('show');
+  const btn = document.querySelector('#loginForm button[type="submit"]');
+  btn.disabled = true; btn.textContent = 'Ingresando...';
+  try{
+    const cred = await auth.signInWithEmailAndPassword(email.trim(), password);
+    const emailKey = cred.user.email.toLowerCase();
+    const profSnap = await db.collection('usuarios').doc(emailKey).get();
+    if(!profSnap.exists){
+      errBox.textContent = 'Tu cuenta existe pero no tiene un perfil asignado (zona/rol). Pídele al administrador que te dé de alta desde el modo administrador.';
+      errBox.classList.add('show');
+      await auth.signOut();
+      return;
+    }
+    const perfil = profSnap.data();
+    loggedUser = { usuario: emailKey, email: emailKey, nombre: perfil.nombre||emailKey, zona: perfil.zona||null, rol: perfil.rol||'comercial' };
+    currentUserName = loggedUser.nombre;
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appRoot').style.display='block';
+    document.getElementById('userChip').innerHTML = `<b>${loggedUser.nombre}</b><br><span style="color:#C9C9C7;">${emailKey}</span>`;
+    const initials = loggedUser.nombre.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    document.getElementById('userAvatar').textContent = initials;
+    showWelcomeToast(`Bienvenido ${loggedUser.nombre} — vas a colaborar`);
+    startApp();
+  }catch(e){
+    const mensajes = {
+      'auth/invalid-email':'Correo inválido.',
+      'auth/user-not-found':'No existe una cuenta con ese correo.',
+      'auth/wrong-password':'Contraseña incorrecta.',
+      'auth/invalid-credential':'Correo o contraseña incorrectos.',
+      'auth/too-many-requests':'Demasiados intentos fallidos. Espera un momento e intenta de nuevo.'
+    };
+    errBox.textContent = mensajes[e.code] || ('Error al ingresar: '+e.message);
+    errBox.classList.add('show');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Ingresar';
+  }
+}
+async function doLogout(){
+  if(unsubscribeProyecciones){ unsubscribeProyecciones(); unsubscribeProyecciones=null; }
+  try{ await auth.signOut(); }catch(e){}
+  loggedUser = null;
+  currentUserName = '';
+  document.getElementById('loginForm').reset();
+  document.getElementById('appRoot').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+}
+document.getElementById('loginForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  doLogin(document.getElementById('loginUser').value, document.getElementById('loginPass').value);
+});
+document.getElementById('btnLogout').addEventListener('click', doLogout);
+
+/* =====================================================================
+   MODO ADMINISTRADOR — candado + ADMIN/ADMIN123. Permite cambiar el
+   ciclo PVO vigente y cargar un Excel nuevo (siempre se lee en vivo
+   del archivo, no queda ninguna data de base guardada en el código).
+   ===================================================================== */
+function openAdminModal(){
+  document.getElementById('adminOverlay').classList.add('show');
+  document.getElementById('adminLoginBox').style.display = adminUnlocked? 'none':'block';
+  document.getElementById('adminPanelBox').style.display = adminUnlocked? 'block':'none';
+  if(adminUnlocked) refreshAdminInfo();
+}
+function closeAdminModal(){ document.getElementById('adminOverlay').classList.remove('show'); }
+
+function renderAdminAvanceTable(){
+  const table = document.getElementById('adminAvanceTable');
+  if(!DATA){ table.innerHTML=''; lastAvanceStats=[]; return; }
+  const stats = DATA.vend.map((zona,vi)=>{
+    let total=0, capturados=0, aprobados=0;
+    DATA.rows.forEach((r,i)=>{
+      if(r[0]!==vi) return;
+      total++;
+      const key = llaveOf(i);
+      const proj = projections[key];
+      if(proj){
+        capturados++;
+        if(proj.estado==='aprobado') aprobados++;
+      }
+    });
+    const pct = total? (capturados/total*100) : 0;
+    return { zona, total, capturados, aprobados, pct };
+  }).sort((a,b)=> b.pct-a.pct);
+  lastAvanceStats = stats;
+
+  let html = '<thead><tr><th class="rowlabel">Zona</th><th>Combinaciones</th><th>Capturadas</th><th>Aprobadas</th><th>% avance</th></tr></thead><tbody>';
+  stats.forEach(s=>{
+    html += `<tr><td class="rowlabel">${s.zona}</td><td class="num">${s.total}</td><td class="num">${s.capturados}</td><td class="num">${s.aprobados}</td><td class="num">${s.pct.toFixed(0)}%</td></tr>`;
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+let lastAvanceStats = [];
+
+function renderResumenEjecutivo(){
+  const brechaBox = document.getElementById('adminTopBrecha');
+  const pendBox = document.getElementById('adminTopPendientes');
+  if(!DATA){ brechaBox.innerHTML=''; pendBox.innerHTML=''; return; }
+
+  // top 5 mayor brecha vs PPTO
+  const brechas = [];
+  DATA.rows.forEach((r,i)=>{
+    const pvo = pvoOf(i);
+    const totalPvo = windowSum(pvo, PVO_OFFSET);
+    const totalPpto = windowSum(r[7], PPTO_OFFSET);
+    if(totalPpto>0){
+      brechas.push({ i, r, diff: totalPvo-totalPpto, abs: Math.abs(totalPvo-totalPpto) });
+    }
+  });
+  brechas.sort((a,b)=> b.abs-a.abs);
+  brechaBox.innerHTML = brechas.slice(0,5).map(b=>{
+    const signo = b.diff>0? '+':'';
+    const color = b.diff>0? 'var(--good)':'var(--bad)';
+    return `<div class="mini-list-item"><div class="mli-name">${b.r[3]}</div><div class="mli-meta">${DATA.cli[b.r[1]]} · ${DATA.vend[b.r[0]]} · <span style="color:${color};font-weight:600;">${signo}${fmt(b.diff)}</span> vs PPTO</div></div>`;
+  }).join('') || '<div class="mli-meta">Sin datos suficientes.</div>';
+
+  // clientes con menor % de captura
+  const porCliente = {};
+  DATA.rows.forEach((r,i)=>{
+    const cli = DATA.cli[r[1]];
+    if(!porCliente[cli]) porCliente[cli] = {total:0, capturados:0};
+    porCliente[cli].total++;
+    if(projections[llaveOf(i)]) porCliente[cli].capturados++;
+  });
+  const clientesArr = Object.entries(porCliente).map(([cli,s])=>({
+    cliente:cli, total:s.total, capturados:s.capturados, pct: s.total? (s.capturados/s.total*100):0
+  })).sort((a,b)=> a.pct-b.pct);
+  pendBox.innerHTML = clientesArr.slice(0,5).map(c=>{
+    return `<div class="mini-list-item"><div class="mli-name">${c.cliente}</div><div class="mli-meta">${c.capturados} de ${c.total} capturados · ${c.pct.toFixed(0)}%</div></div>`;
+  }).join('') || '<div class="mli-meta">Sin datos suficientes.</div>';
+}
+
+async function renderCicloComparativo(){
+  const box = document.getElementById('adminCicloComparativo');
+  if(!DATA){ box.textContent='Sin catálogo cargado.'; return; }
+  try{
+    const res = await STORAGE.get('stats_ciclo_anterior', true);
+    if(!res || !res.value){
+      box.textContent = 'Aún no hay un ciclo anterior guardado (se genera automáticamente la primera vez que cargues un Excel nuevo o cambies de ciclo).';
+      return;
+    }
+    const prev = JSON.parse(res.value);
+    let totalActual = 0;
+    DATA.rows.forEach((r,i)=>{ totalActual += windowSum(pvoOf(i), PVO_OFFSET); });
+    const delta = prev.total? ((totalActual-prev.total)/prev.total*100) : null;
+    const deltaTxt = delta===null ? '' : ` (${delta>=0?'+':''}${delta.toFixed(0)}%)`;
+    box.innerHTML = `Ciclo anterior (PVO ${prev.cycle}, guardado el ${new Date(prev.fecha).toLocaleDateString('es-CO')}): total capturado <b>${fmt(prev.total)}</b>.<br>Este ciclo (PVO ${VEN_META.cycle_month}) llevas <b>${fmt(totalActual)}</b>${deltaTxt}.`;
+  }catch(e){
+    box.textContent = 'No se pudo cargar la comparación.';
+  }
+}
+
+function exportAvanceExcel(){
+  if(!DATA || !lastAvanceStats.length){ alert('No hay datos de avance para exportar.'); return; }
+  const aoa = [['Zona','Combinaciones','Capturadas','Aprobadas','% Avance']];
+  lastAvanceStats.forEach(s=> aoa.push([s.zona, s.total, s.capturados, s.aprobados, s.pct.toFixed(1)+'%']));
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Avance_PVO');
+  XLSX.writeFile(wb, `avance_pvo_ciclo${VEN_META.cycle_month}.xlsx`);
+}
+document.getElementById('btnExportAvance').addEventListener('click', exportAvanceExcel);
+
+async function refreshFechaLimiteBanner(){
+  const banner = document.getElementById('fechaLimiteBanner');
+  try{
+    const res = await STORAGE.get('fecha_limite', true);
+    if(!res || !res.value){ banner.style.display='none'; return; }
+    const fecha = new Date(res.value+'T23:59:59');
+    const hoy = new Date();
+    const diffDias = Math.ceil((fecha-hoy)/(1000*60*60*24));
+    banner.style.display='block';
+    let cls='ok', msg='';
+    if(diffDias<0){ cls='bad'; msg=`El ciclo PVO venció hace ${Math.abs(diffDias)} día(s) (fecha límite: ${res.value}).`; }
+    else if(diffDias===0){ cls='bad'; msg=`¡Hoy es el último día para capturar! Fecha límite: ${res.value}.`; }
+    else if(diffDias<=3){ cls='bad'; msg=`Quedan ${diffDias} día(s) para el cierre del ciclo PVO (${res.value}).`; }
+    else if(diffDias<=7){ cls='warn'; msg=`Quedan ${diffDias} días para el cierre del ciclo PVO (${res.value}).`; }
+    else { cls='ok'; msg=`Quedan ${diffDias} días para el cierre del ciclo PVO (${res.value}).`; }
+    banner.className = 'fecha-banner '+cls;
+    banner.textContent = msg;
+  }catch(e){ banner.style.display='none'; }
+}
+
+document.getElementById('btnAplicarFecha').addEventListener('click', async ()=>{
+  const val = document.getElementById('adminFechaLimite').value;
+  const status = document.getElementById('adminFechaStatus');
+  if(!val){ status.innerHTML='<span style="color:var(--bad);">Elige una fecha.</span>'; return; }
+  await STORAGE.set('fecha_limite', val, true);
+  status.innerHTML = `<span style="color:var(--good);">Fecha límite guardada: ${val}.</span>`;
+  refreshFechaLimiteBanner();
+});
+
+async function initFechaLimiteInput(){
+  try{
+    const res = await STORAGE.get('fecha_limite', true);
+    if(res && res.value) document.getElementById('adminFechaLimite').value = res.value;
+  }catch(e){}
+}
+
+/* ---- exportar Excel actualizado ---- */
+function exportExcel(){
+  if(!DATA){ alert('No hay catálogo cargado.'); return; }
+  const cycleLabels = MASTER_MONTHS.slice(PVO_OFFSET, PVO_OFFSET+PVO_LEN).map(m=>m.label);
+  const header = ['Zona','Cliente','Item_ID','Articulo','AA_2025_total','PPTO_ciclo','Sugerido_ciclo','Proyeccion_ciclo_total','Estado','Comentario','Actualizado_por','Actualizado_el', ...cycleLabels];
+  const aoa = [header];
+  DATA.rows.forEach((r,i)=>{
+    const pvo = pvoOf(i);
+    const proj = projections[llaveOf(i)];
+    aoa.push([
+      DATA.vend[r[0]], DATA.cli[r[1]], r[2], r[3],
+      r[6].slice(0,12).reduce((a,b)=>a+(b||0),0),
+      windowSum(r[7],PPTO_OFFSET), windowSum(r[8],SUG_OFFSET), windowSum(pvo,PVO_OFFSET),
+      proj? estadoLabel(proj.estado||'pendiente') : 'Sin capturar',
+      proj? (proj.comentario||'') : '',
+      proj? (proj.updatedBy||'') : '',
+      proj? new Date(proj.updatedAt).toLocaleString('es-CO') : '',
+      ...pvo.map(v=>v||0)
+    ]);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Proyeccion_PVO');
+  XLSX.writeFile(wb, `proyeccion_pvo_ciclo${VEN_META.cycle_month}.xlsx`);
+}
+document.getElementById('btnExportExcel').addEventListener('click', exportExcel);
+
+function refreshAdminInfo(){
+  const info = document.getElementById('adminCatalogInfo');
+  if(!DATA){
+    info.innerHTML = 'No hay catálogo cargado todavía.';
+  } else {
+    info.innerHTML = `<b>${DATA.rows.length.toLocaleString('es-CO')}</b> combinaciones cargadas · <b>${DATA.vend.length}</b> zonas · Ciclo PVO vigente: <b>${VEN_META.cycle_month}</b> (${VEN_META.pvo_start} a ${MASTER_MONTHS[PVO_OFFSET+PVO_LEN-1].label})${cycleOverride? ' <span style="color:var(--warn)">— ciclo ajustado manualmente</span>':''}`;
+  }
+  const selMes = document.getElementById('adminCicloMes');
+  if(!selMes.dataset.filled){
+    selMes.innerHTML = MES_NOMBRES.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
+    selMes.dataset.filled='1';
+  }
+  if(VEN_META){
+    const p = parseLabel(VEN_META.pvo_start);
+    selMes.value = String(p.m);
+    document.getElementById('adminCicloAnio').value = p.y;
+  }
+  renderAdminAvanceTable();
+  renderResumenEjecutivo();
+  renderCicloComparativo();
+  initFechaLimiteInput();
+  STORAGE.get('catalogo_anterior', true).then(res=>{
+    document.getElementById('btnRevertirCatalogo').style.display = (res && res.value) ? 'inline-block' : 'none';
+  }).catch(()=>{});
+
+  const nuZona = document.getElementById('nuZona');
+  if(DATA){
+    nuZona.innerHTML = DATA.vend.map(v=>`<option value="${v}">${v}</option>`).join('');
+  }
+}
+
+/* ---- gestionar usuarios: crea la cuenta (Auth) + el perfil (Firestore) ---- */
+document.getElementById('nuRol').addEventListener('change', e=>{
+  document.getElementById('nuZonaWrap').style.display = (e.target.value==='admin') ? 'none' : 'block';
+});
+
+let secondaryFirebaseApp = null;
+function getSecondaryAuth(){
+  if(!secondaryFirebaseApp){
+    secondaryFirebaseApp = firebase.initializeApp(firebaseConfig, 'Secondary');
+  }
+  return secondaryFirebaseApp.auth();
+}
+
+document.getElementById('btnCrearUsuario').addEventListener('click', async ()=>{
+  const status = document.getElementById('nuStatus');
+  const email = document.getElementById('nuEmail').value.trim().toLowerCase();
+  const password = document.getElementById('nuPassword').value;
+  const nombre = document.getElementById('nuNombre').value.trim();
+  const rol = document.getElementById('nuRol').value;
+  const zona = rol==='admin' ? null : document.getElementById('nuZona').value;
+
+  if(!email || !password || !nombre){ status.innerHTML='<span style="color:var(--bad);">Completa correo, contraseña y nombre.</span>'; return; }
+  if(password.length<6){ status.innerHTML='<span style="color:var(--bad);">La contraseña debe tener al menos 6 caracteres.</span>'; return; }
+
+  status.textContent = 'Creando usuario...';
+  try{
+    const secAuth = getSecondaryAuth();
+    await secAuth.createUserWithEmailAndPassword(email, password);
+    await secAuth.signOut(); // no deja abierta la sesión secundaria
+    await db.collection('usuarios').doc(email).set({ nombre, zona, rol });
+    status.innerHTML = `<span style="color:var(--good);font-weight:600;">Usuario ${email} creado (${rol}${zona?', '+zona:''}). Comunícale la contraseña por otro medio.</span>`;
+    document.getElementById('nuEmail').value='';
+    document.getElementById('nuPassword').value='';
+    document.getElementById('nuNombre').value='';
+  }catch(e){
+    const mensajes = {
+      'auth/email-already-in-use':'Ya existe una cuenta con ese correo.',
+      'auth/invalid-email':'Correo inválido.',
+      'auth/weak-password':'La contraseña es muy débil (mínimo 6 caracteres).'
+    };
+    status.innerHTML = `<span style="color:var(--bad);">${mensajes[e.code] || ('Error: '+e.message)}</span>`;
+  }
+});
+
+document.getElementById('btnAdminLock').addEventListener('click', openAdminModal);
+document.getElementById('btnAdminClose').addEventListener('click', closeAdminModal);
+document.getElementById('adminOverlay').addEventListener('click', e=>{ if(e.target.id==='adminOverlay') closeAdminModal(); });
+
+document.getElementById('adminLoginForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const u = document.getElementById('adminUser').value.trim().toUpperCase();
+  const p = document.getElementById('adminPass').value;
+  const errBox = document.getElementById('adminLoginError');
+  if(u===ADMIN_MODE_USER && p===ADMIN_MODE_PASS){
+    errBox.classList.remove('show');
+    adminUnlocked = true;
+    document.getElementById('adminLoginBox').style.display='none';
+    document.getElementById('adminPanelBox').style.display='block';
+    refreshAdminInfo();
+  } else {
+    errBox.textContent = 'Usuario o contraseña de administrador incorrectos.';
+    errBox.classList.add('show');
+  }
+});
+
+document.getElementById('btnAplicarCiclo').addEventListener('click', async ()=>{
+  const status = document.getElementById('adminCicloStatus');
+  if(!DATA){ status.innerHTML = '<span style="color:var(--bad);">Primero carga un catálogo.</span>'; return; }
+  const mes = Number(document.getElementById('adminCicloMes').value);
+  const anio = Number(document.getElementById('adminCicloAnio').value);
+  if(!mes || !anio || anio<2000){ status.innerHTML='<span style="color:var(--bad);">Mes/año inválidos.</span>'; return; }
+  const label = MES_NOMBRES[mes-1]+'-'+String(anio).slice(2);
+  if(label!==VEN_META.pvo_start){
+    // guarda una foto del ciclo que se está cerrando, para poder comparar después
+    let totalProyAnterior = 0;
+    DATA.rows.forEach((r,i)=>{ totalProyAnterior += windowSum(pvoOf(i), PVO_OFFSET); });
+    await STORAGE.set('stats_ciclo_anterior', JSON.stringify({
+      cycle: VEN_META.cycle_month, total: totalProyAnterior, fecha: new Date().toISOString()
+    }), true);
+  }
+  cycleOverride = label;
+  await STORAGE.set('cycle_override', label, true);
+  computeMonthModel();
+  refreshAdminInfo();
+  refresh();
+  status.innerHTML = `<span style="color:var(--good);">Ciclo aplicado: ahora el mes N es <b>${label}</b>. Todo el sistema se reorganizó.</span>`;
+});
+
+let pendingCatalog = null;
+document.getElementById('adminFileInput').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const status = document.getElementById('adminUploadStatus');
+  const confirmBox = document.getElementById('adminUploadConfirm');
+  status.innerHTML = 'Leyendo archivo...';
+  confirmBox.style.display='none';
+  try{
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(new Uint8Array(buf), {type:'array'});
+    const parsed = parseWorkbook(wb);
+    pendingCatalog = parsed;
+
+    const zonasAnt = DATA ? new Set(DATA.vend) : new Set();
+    const zonasNuevas = new Set(parsed.vend);
+    const desaparecen = [...zonasAnt].filter(z=>!zonasNuevas.has(z));
+    const aparecen = [...zonasNuevas].filter(z=>!zonasAnt.has(z));
+    const filasAnt = DATA ? DATA.rows.length : 0;
+    const deltaFilas = parsed.rows.length - filasAnt;
+
+    let html = `<b>Vas a reemplazar el catálogo actual para TODO el equipo.</b><br>
+      Filas: ${filasAnt.toLocaleString('es-CO')} → ${parsed.rows.length.toLocaleString('es-CO')} (${deltaFilas>=0?'+':''}${deltaFilas})<br>
+      Ciclo detectado: PVO ${parsed.meta.cycle_month} (${parsed.meta.pvo_start})`;
+    if(desaparecen.length) html += `<br><span style="color:var(--bad);font-weight:600;">⚠ Zonas que desaparecen: ${desaparecen.join(', ')}</span>`;
+    if(aparecen.length) html += `<br><span style="color:var(--warn);font-weight:600;">Zonas nuevas: ${aparecen.join(', ')}</span>`;
+    html += `<div style="margin-top:10px;display:flex;gap:10px;">
+      <button class="btn primary" id="btnConfirmarCarga">Confirmar y reemplazar</button>
+      <button class="btn" id="btnCancelarCarga">Cancelar</button>
+    </div>`;
+    confirmBox.innerHTML = html;
+    confirmBox.style.display='block';
+    status.textContent='';
+
+    document.getElementById('btnCancelarCarga').addEventListener('click', ()=>{
+      pendingCatalog = null;
+      confirmBox.style.display='none';
+      document.getElementById('adminFileInput').value='';
+    });
+    document.getElementById('btnConfirmarCarga').addEventListener('click', async ()=>{
+      await applyPendingCatalog();
+      confirmBox.style.display='none';
+    });
+  }catch(err){
+    status.innerHTML = `<span style="color:var(--bad);">Error al leer el archivo: ${err.message}</span>`;
+  }
+});
+
+async function applyPendingCatalog(){
+  const parsed = pendingCatalog;
+  if(!parsed) return;
+  const status = document.getElementById('adminUploadStatus');
+  try{
+    if(DATA){
+      // respaldo del catálogo anterior + foto de sus totales, para comparar ciclos
+      let totalProyAnterior = 0;
+      DATA.rows.forEach((r,i)=>{ totalProyAnterior += windowSum(pvoOf(i), PVO_OFFSET); });
+      await STORAGE.set('catalogo_anterior', JSON.stringify(DATA), true);
+      await STORAGE.set('stats_ciclo_anterior', JSON.stringify({
+        cycle: VEN_META.cycle_month, total: totalProyAnterior, fecha: new Date().toISOString()
+      }), true);
+    }
+    DATA = { vend:parsed.vend, cli:parsed.cli, canal:parsed.canal, rows:parsed.rows, meta:parsed.meta };
+    cycleOverride = null;
+    await STORAGE.delete('cycle_override', true);
+    await STORAGE.set('catalogo_actual', JSON.stringify(DATA), true);
+    computeMonthModel();
+    populateFilterSelects();
+    currentVendIdx = '';
+    document.getElementById('selVendedor').value = '';
+    document.getElementById('selVendedor').disabled = (loggedUser && loggedUser.rol!=='admin' && loggedUser.zona) ? true : false;
+    if(loggedUser && loggedUser.rol!=='admin' && loggedUser.zona){
+      const idx = DATA.vend.findIndex(v=>v.toUpperCase()===loggedUser.zona.toUpperCase());
+      if(idx>=0){ currentVendIdx=String(idx); document.getElementById('selVendedor').value=String(idx); }
+    }
+    refreshClienteOptions();
+    refresh();
+    refreshAdminInfo();
+    status.innerHTML = `<span style="color:var(--good);">Catálogo cargado: ${parsed.rows.length.toLocaleString('es-CO')} filas (se excluyeron ${parsed.skipped} de zonas no comerciales). Ciclo detectado: PVO ${parsed.meta.cycle_month}.</span>`;
+    pendingCatalog = null;
+  }catch(err){
+    status.innerHTML = `<span style="color:var(--bad);">Error al aplicar el catálogo: ${err.message}</span>`;
+  }
+}
+
+document.getElementById('btnRevertirCatalogo').addEventListener('click', async ()=>{
+  const status = document.getElementById('adminUploadStatus');
+  try{
+    const res = await STORAGE.get('catalogo_anterior', true);
+    if(!res || !res.value){ status.innerHTML='<span style="color:var(--bad);">No hay un catálogo anterior guardado.</span>'; return; }
+    DATA = JSON.parse(res.value);
+    cycleOverride = null;
+    await STORAGE.delete('cycle_override', true);
+    await STORAGE.set('catalogo_actual', JSON.stringify(DATA), true);
+    computeMonthModel();
+    populateFilterSelects();
+    refreshClienteOptions();
+    refresh();
+    refreshAdminInfo();
+    status.innerHTML = '<span style="color:var(--good);">Se revirtió al catálogo anterior.</span>';
+  }catch(err){
+    status.innerHTML = `<span style="color:var(--bad);">Error: ${err.message}</span>`;
+  }
+});
+
+/* ---- carga inicial del catálogo guardado (si existe) ---- */
+async function loadCatalog(){
+  try{
+    const res = await STORAGE.get('catalogo_actual', true);
+    if(res && res.value){
+      DATA = JSON.parse(res.value);
+    } else {
+      DATA = null;
+    }
+    const ov = await STORAGE.get('cycle_override', true);
+    cycleOverride = (ov && ov.value) ? ov.value : null;
+  }catch(e){
+    DATA = null; cycleOverride = null;
+  }
+  if(DATA){
+    computeMonthModel();
+    populateFilterSelects();
+  }
+}
+
+/* ---- init (tras login exitoso) ---- */
+let appStarted=false;
+async function startApp(){
+  if(!appStarted){
+    bindFilterListeners();
+    appStarted=true;
+  }
+  await loadCatalog();
+  projections = {};
+  subscribeProyecciones();
+
+  const selV = document.getElementById('selVendedor');
+  if(DATA && loggedUser.rol!=='admin' && loggedUser.zona){
+    const idx = DATA.vend.findIndex(v => v.toUpperCase()===loggedUser.zona.toUpperCase());
+    if(idx>=0){
+      currentVendIdx = String(idx);
+      selV.value = String(idx);
+      selV.disabled = true;
+    }
+  } else {
+    selV.disabled = false;
+  }
+  refreshClienteOptions();
+  refresh();
+}
+</script>
+</body>
+</html>
