@@ -1,0 +1,1638 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Gastos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky filter bar over a summary-first grid — KPIs, then trend, then "where" (treemap/ranking), then "how it changed", then the ledger. */
+:root{
+  /* TOPTEC brand: primary #575756 + white; secondary yellow #ffd500, blue #0058a5, red #e30613 and their shades */
+  --bg:#ececeb; --surface:#ffffff; --surface-2:#f4f4f3; --ink:#3a3a39; --ink-2:#575756; --muted:#737371; --line:#dcdcda;
+  --accent:#0058a5; --accent-soft:#e3edf7; --focus:#0058a5; --brand:#575756; --brand-ink:#ffffff; --brand-ink-2:#e2e2e0; --gold:#ffd500; --blue:#0058a5;
+  --seg-on:#575756; --seg-on-ink:#ffffff;
+  --s1:#0058a5; --s2:#e30613; --s3:#e8b800; --s4:#5b9bd5; --s5:#a81815; --s6:#003a6b; --s7:#8a6d00;
+  --up:#e30613; --down:#0058a5; --up-soft:#fde6e7; --down-soft:#e3edf7;
+  --h1:#e6eef7; --h2:#9fc0e3; --h3:#3f82c7; --h4:#0058a5; --h5:#003a6b; --other:#c4c4c2;
+  --display:"Objective", "Urbanist", "Segoe UI", system-ui, sans-serif;
+  --body:"Objective", "Urbanist", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#262625; --surface:#313130; --surface-2:#3b3b3a; --ink:#ffffff; --ink-2:#dededc; --muted:#a8a8a5; --line:#4a4a48;
+  --accent:#6aaef0; --accent-soft:#1f3550; --focus:#6aaef0; --brand:#575756; --brand-ink:#ffffff; --brand-ink-2:#e2e2e0; --gold:#ffd500; --blue:#0058a5;
+  --seg-on:#ffffff; --seg-on-ink:#262625;
+  --s1:#4a9ae0; --s2:#ff3b45; --s3:#ffd500; --s4:#a9d0f2; --s5:#ff8a80; --s6:#2f6eb0; --s7:#b98f00;
+  --up:#ff5a62; --down:#6aaef0; --up-soft:#4a2426; --down-soft:#1f3550;
+  --h1:#2e3a48; --h2:#1d4f80; --h3:#2f6eb0; --h4:#4a9ae0; --h5:#a9d0f2; --other:#6b6b69;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#262625; --surface:#313130; --surface-2:#3b3b3a; --ink:#ffffff; --ink-2:#dededc; --muted:#a8a8a5; --line:#4a4a48;
+  --accent:#6aaef0; --accent-soft:#1f3550; --focus:#6aaef0; --brand:#575756; --brand-ink:#ffffff; --brand-ink-2:#e2e2e0; --gold:#ffd500; --blue:#0058a5;
+  --seg-on:#ffffff; --seg-on-ink:#262625;
+  --s1:#4a9ae0; --s2:#ff3b45; --s3:#ffd500; --s4:#a9d0f2; --s5:#ff8a80; --s6:#2f6eb0; --s7:#b98f00;
+  --up:#ff5a62; --down:#6aaef0; --up-soft:#4a2426; --down-soft:#1f3550;
+  --h1:#2e3a48; --h2:#1d4f80; --h3:#2f6eb0; --h4:#4a9ae0; --h5:#a9d0f2; --other:#6b6b69;
+  color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;margin:0}
+.wrap{max-width:1360px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:20px 48px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em;color:var(--ink-2)}
+h1{font-size:clamp(2rem,4vw,3rem);font-weight:800;line-height:1.05}
+h2{font-size:1.15rem;font-weight:700}
+.mono,.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.kpi .v,.pct{font-variant-numeric:tabular-nums}
+.eyebrow{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+header.band{background:var(--brand);color:var(--brand-ink);position:relative;overflow:hidden}
+header.band::before{content:"";position:absolute;left:0;top:0;width:0;height:0;border-top:56px solid var(--gold);border-right:56px solid transparent}
+header.band::after{content:"";position:absolute;right:0;bottom:0;width:0;height:0;border-bottom:40px solid var(--blue);border-left:40px solid transparent}
+.band-top{max-width:1360px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:14px 12px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 24px;border-bottom:1px solid rgb(255 255 255 / .14);position:relative}
+.band-in{max-width:1360px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:22px 26px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:16px 40px;position:relative}
+.band-title{min-width:0}
+.band h1{color:var(--brand-ink)}
+.band .eyebrow{color:var(--gold)}
+.band p{margin:8px 0 0;color:var(--brand-ink-2);max-width:68ch;font-weight:300;font-size:.95rem}
+.wordmark{display:flex;align-items:baseline;gap:10px;padding-left:40px}
+.wordmark>b{font-family:var(--display);font-weight:900;font-size:1.5rem;letter-spacing:.02em;line-height:1;color:var(--brand-ink)}
+.wordmark span{font-weight:400;font-size:.85rem;color:var(--brand-ink-2)}
+.stamp{font-family:var(--mono);font-size:.74rem;color:var(--brand-ink-2);line-height:1.7;text-align:right;white-space:nowrap}
+.stamp b{color:var(--brand-ink);font-weight:500}
+.band-top .userbar{margin-top:0}
+@media (max-width:760px){ .band-in{grid-template-columns:minmax(0,1fr)} .stamp{text-align:left;white-space:normal} .wordmark{padding-left:28px} }
+
+/* filter bar */
+.filters{position:relative;z-index:2;background:var(--surface);
+  border-bottom:1px solid var(--line);margin-inline:calc(-1 * clamp(16px,3vw,32px));padding:10px clamp(16px,3vw,32px);display:flex;flex-wrap:wrap;gap:10px 18px;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label,.f .lbl{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+select,input[type=search]{font:inherit;font-size:.86rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 8px;min-height:34px;max-width:100%}
+input[type=search]{width:220px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{font:inherit;font-size:.82rem;border:0;background:transparent;color:var(--ink-2);padding:5px 10px;border-radius:6px;cursor:pointer;min-height:28px}
+.seg button[aria-pressed="true"]{background:var(--seg-on);color:var(--seg-on-ink);font-weight:700}
+button:focus-visible,select:focus-visible,input:focus-visible,.chip:focus-visible,th:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.btn{font:inherit;font-size:.82rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;padding:6px 12px;cursor:pointer;min-height:34px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.active-filters{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.active-filters:empty{display:none}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:3px 4px 3px 10px;font-size:.8rem;max-width:100%}
+.pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill button{border:0;background:transparent;color:var(--ink-2);cursor:pointer;font-size:1rem;line-height:1;width:22px;height:22px;border-radius:50%}
+.pill button:hover{background:var(--surface)}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:18px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi .v{font-family:var(--display);font-size:1.7rem;font-weight:800;letter-spacing:-.01em;color:var(--ink-2);font-variant-numeric:tabular-nums;line-height:1.2}
+.kpi .s{font-size:.8rem;color:var(--ink-2)}
+.delta{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:.8rem;border-radius:5px;padding:1px 6px;width:fit-content}
+.delta.up{background:var(--up-soft);color:var(--up)}
+.delta.down{background:var(--down-soft);color:var(--down)}
+.delta.na{background:var(--surface-2);color:var(--muted)}
+
+.insights{margin-top:12px;background:var(--surface-2);border-radius:var(--r);padding:12px 16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px 24px}
+.insights p{margin:0;font-size:.88rem;color:var(--ink-2)}
+.insights b{color:var(--ink);font-weight:600}
+
+/* panels */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.span-12{grid-column:span 12}.span-7{grid-column:span 7}.span-5{grid-column:span 5}.span-6{grid-column:span 6}
+@media (max-width:980px){.span-7,.span-5,.span-6{grid-column:span 12}}
+.ph{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 16px}
+.ph .sub{font-size:.82rem;color:var(--muted);margin-top:2px;max-width:70ch}
+.chart{width:100%;min-width:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 10px 4px 8px;font:inherit;font-size:.8rem;cursor:pointer}
+.chip i{width:10px;height:10px;border-radius:3px;flex:none}
+.chip .pct{font-family:var(--mono);font-size:.74rem;color:var(--muted)}
+.chip[aria-pressed="false"]{opacity:.45}
+.chip[aria-pressed="false"] i{background:transparent!important;outline:1.5px solid var(--muted);outline-offset:-1.5px}
+.chip:hover{border-color:var(--ink-2)}
+.hint{font-size:.76rem;color:var(--muted)}
+.note{font-size:.78rem;color:var(--muted);margin:0}
+
+/* table */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.82rem}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{position:sticky;top:0;background:var(--surface-2);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);cursor:pointer;white-space:nowrap;user-select:none}
+th[aria-sort="ascending"]::after{content:" ▲"}
+th[aria-sort="descending"]::after{content:" ▼"}
+td.r,th.r{text-align:right}
+td.num{white-space:nowrap}
+td .dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:middle}
+td.cm{color:var(--ink-2);max-width:340px}
+tbody tr:hover{background:var(--surface-2)}
+.neg{color:var(--down)}
+.pager{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;font-size:.82rem;color:var(--ink-2)}
+.pager .btns{display:flex;gap:6px}
+footer{margin-top:24px;color:var(--muted);font-size:.78rem;max-width:90ch}
+@media (max-height:760px),(max-width:900px){ .filters{position:static} }
+@media (max-width:600px){ input[type=search]{width:100%} .f.grow{flex:1 1 100%} .wordmark{align-items:flex-start;text-align:left} }
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+.levels{display:flex;flex-wrap:wrap;gap:10px 14px;width:100%;align-items:flex-end}
+.levels .ms{position:relative}
+.ms-btn{font:inherit;font-size:.86rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 28px 6px 8px;min-height:34px;width:210px;max-width:100%;text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
+.ms-btn::after{content:"";position:absolute;right:10px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--ink-2);border-bottom:1.5px solid var(--ink-2);transform:translateY(-70%) rotate(45deg)}
+.ms-btn.on{border-color:var(--accent);background:var(--accent-soft)}
+.ms-pop{position:absolute;top:calc(100% + 4px);left:0;z-index:40;width:min(380px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgb(0 0 0 / .18);padding:10px;display:flex;flex-direction:column;gap:8px}
+.ms-pop input[type=search]{width:100%}
+.ms-actions{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.linkbtn{font:inherit;font-size:.78rem;border:0;background:none;color:var(--accent);cursor:pointer;padding:2px 0}
+.linkbtn:hover{text-decoration:underline}
+.ms-list{max-height:300px;overflow:auto;display:flex;flex-direction:column}
+.ms-list label{display:flex;gap:8px;align-items:flex-start;padding:5px 6px;border-radius:6px;font-size:.82rem;cursor:pointer;line-height:1.35}
+.ms-list label:hover{background:var(--surface-2)}
+.ms-list input{margin-top:2px;accent-color:var(--accent)}
+.ms-count{font-size:.74rem;color:var(--muted)}
+.path{font-size:.72rem;color:var(--muted);line-height:1.4}
+.lvlseg button{font-family:var(--mono)}
+@media (max-width:600px){ .ms-btn{width:100%} .levels .f{flex:1 1 100%} }
+
+/* Acceso, barra de usuario y panel de administración. Usa los tokens de styles.css. */
+[hidden]{display:none!important}
+.auth-screen{min-height:100vh;display:grid;place-items:center;padding:32px 16px;background:var(--bg)}
+.auth-screen.overlay{position:fixed;inset:0;z-index:60;overflow:auto;background:rgb(0 0 0 / .55)}
+.pw-row{display:flex;gap:8px}
+.pw-row input{flex:1;min-width:0;font-family:var(--mono)}
+.auth-card{width:min(440px,100%);background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgb(0 0 0 / .12)}
+.auth-brand{background:var(--brand);color:var(--brand-ink);padding:26px 28px 22px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:2px}
+.auth-brand::before{content:"";position:absolute;left:0;top:0;border-top:44px solid var(--gold);border-right:44px solid transparent}
+.auth-brand::after{content:"";position:absolute;right:0;bottom:0;border-bottom:30px solid var(--blue);border-left:30px solid transparent}
+.auth-brand b{font-family:var(--display);font-weight:900;font-size:2rem;letter-spacing:.02em;line-height:1;padding-left:22px}
+.auth-brand span{font-size:.92rem;padding-left:22px}
+.auth-body{padding:24px 28px 26px;display:flex;flex-direction:column;gap:12px}
+.auth-body h2{font-size:1.35rem;font-weight:800}
+.auth-sub{margin:0;color:var(--ink-2);font-size:.9rem}
+.auth-form{display:flex;flex-direction:column;gap:6px}
+.auth-form label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:4px}
+.auth-form input{font:inherit;font-size:.95rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+.auth-form input:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.btn-primary{font:inherit;font-weight:700;font-size:.92rem;border:0;background:var(--seg-on);color:var(--seg-on-ink);border-radius:8px;padding:10px 14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;min-height:40px}
+.btn-primary:hover{filter:brightness(1.12)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn-primary.google{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.auth-form .btn-primary{margin-top:10px}
+.auth-or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.78rem}
+.auth-or::before,.auth-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.auth-links{display:flex;flex-wrap:wrap;gap:6px 16px}
+.auth-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.auth-msg{margin:0;font-size:.85rem;color:var(--up);min-height:1.2em}
+.auth-msg.ok{color:var(--ink-2)}
+.loading{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:var(--bg);z-index:50}
+.loading .auth-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:.85rem;color:var(--ink-2)}
+.loading .auth-actions a{color:var(--accent)}
+
+.userbar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;justify-content:flex-end;margin-top:12px;font-size:.8rem;color:var(--brand-ink-2)}
+.userbar a,.userbar .linkbtn{color:var(--gold);font-size:.8rem;font-weight:600;text-decoration:none}
+.userbar a:hover,.userbar .linkbtn:hover{text-decoration:underline}
+@media (max-width:600px){ .userbar{justify-content:flex-start} }
+
+/* admin */
+.admin-tabs{margin-top:18px}
+.adm-grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:14px;margin-top:14px;align-items:start}
+@media (max-width:980px){ .adm-grid{grid-template-columns:minmax(0,1fr)} }
+.drop{border:2px dashed var(--line);border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;color:var(--ink-2);background:var(--surface-2);display:flex;flex-direction:column;gap:6px;align-items:center}
+.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.drop b{font-family:var(--display);font-size:1.05rem;color:var(--ink-2)}
+.file-info{font-size:.85rem;color:var(--ink-2);margin:0}
+.err{color:var(--up)}
+.warn{color:var(--s7)}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:.82rem;max-height:220px;overflow:auto}
+.log li{padding:4px 8px;border-radius:6px;background:var(--surface-2)}
+.log li.ok{border-left:3px solid var(--down)}
+.log li.err{border-left:3px solid var(--up);color:var(--up)}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:.85rem;color:var(--ink-2);margin-top:10px}
+.tag{display:inline-block;font-size:.72rem;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line);margin:1px 0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+.tag.new{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.tag.admin{background:var(--seg-on);color:var(--seg-on-ink);border-color:transparent}
+.tag.on{background:var(--down-soft);color:var(--down);border-color:transparent}
+.tag.off{background:var(--up-soft);color:var(--up);border-color:transparent}
+.areas-cell{max-width:240px}
+.seg button[aria-pressed="true"] .count{color:inherit}
+.nowrap{white-space:nowrap}
+.btn.sm{min-height:28px;padding:3px 10px;font-size:.78rem}
+.btn.danger{border-color:var(--up);color:var(--up)}
+.uform{display:flex;flex-direction:column;gap:8px}
+.uform label.f-l{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.uform input[type=email],.uform input[type=text],.uform select{font:inherit;font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.uform input[readonly]{background:var(--surface-2);color:var(--ink-2)}
+.pick{border:1px solid var(--line);border-radius:8px;max-height:260px;overflow:auto;padding:4px}
+.pick label{display:flex;gap:8px;align-items:flex-start;padding:5px 6px;border-radius:6px;font-size:.82rem;cursor:pointer;line-height:1.35}
+.pick label:hover{background:var(--surface-2)}
+.pick input{margin-top:2px;accent-color:var(--accent)}
+.form-msg{margin:0;font-size:.85rem;min-height:1.2em}
+.form-msg.ok{color:var(--ink-2)}
+.form-msg.err{color:var(--up)}
+.row-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.count{font-family:var(--mono);font-size:.8rem;color:var(--muted);font-weight:400}
+
+</style>
+</head>
+<body>
+<div id="auth" class="auth-screen" hidden></div>
+<div id="loading" class="loading" hidden></div>
+<div id="app" hidden>
+<header class="band">
+  <div class="band-top">
+    <div class="wordmark" aria-label="TOPTEC, Es fácil construir"><b>TOPTEC</b><span>Es fácil construir</span></div>
+    <div class="userbar" id="userbar"></div>
+  </div>
+  <div class="band-in">
+    <div class="band-title">
+      <div class="eyebrow" id="eyebrow">Reporte contable</div>
+      <h1 id="title">Gastos</h1>
+      <p>Costos y gastos del área por niveles del plan de cuentas (Nivel 1 a Nivel 5). Usa los filtros o haz clic en una cuenta de cualquier gráfica para filtrar.</p>
+    </div>
+    <div class="stamp">Corte: <b id="corte"></b><br>Movimientos: <b id="nmov"></b><br>Cifras en pesos colombianos · M = millones</div>
+  </div>
+</header>
+<div class="wrap">
+
+  <div class="filters" role="region" aria-label="Filtros">
+    <div class="f">
+      <span class="lbl">Discriminar por</span>
+      <div class="seg lvlseg" id="lvl">
+        <button data-v="1" aria-pressed="false" title="CON_CuentaNivel_1">Nivel 1</button>
+        <button data-v="2" aria-pressed="false" title="CON_CuentaNivel_2">Nivel 2</button>
+        <button data-v="3" aria-pressed="false" title="CON_CuentaNivel_3">Nivel 3</button>
+        <button data-v="4" aria-pressed="false" title="CON_CuentaNivel_4">Nivel 4</button>
+        <button data-v="5" aria-pressed="true" title="CON_CuentaNivel_5 (el más específico)">Nivel 5</button>
+      </div>
+    </div>
+    <div class="f">
+      <span class="lbl">Periodo rápido</span>
+      <div class="seg" id="quick"></div>
+    </div>
+    <div class="f"><label for="from">Desde</label><select id="from"></select></div>
+    <div class="f"><label for="to">Hasta</label><select id="to"></select></div>
+    <div class="f">
+      <span class="lbl">Libro contable</span>
+      <div class="seg" id="libro">
+        <button data-v="niif" aria-pressed="true" title="Movimientos comunes + IFRS. Evita contar dos veces las depreciaciones.">NIIF</button>
+        <button data-v="local" aria-pressed="false" title="Movimientos comunes + libro local (COLGAAP)">Local</button>
+        <button data-v="ambos" aria-pressed="false" title="Suma ambos libros: las depreciaciones quedan duplicadas">Ambos</button>
+      </div>
+    </div>
+    <div class="f"><label for="proj">Proyecto</label><select id="proj"></select></div>
+    <div class="f grow"><label for="q">Buscar</label><input type="search" id="q" placeholder="Cuenta, tercero, comentario…" autocomplete="off"></div>
+    <div class="f"><span class="lbl">&nbsp;</span><button class="btn" id="reset">Limpiar filtros</button></div>
+    <div class="levels" id="levels"></div>
+    <div class="active-filters" id="active"></div>
+  </div>
+
+  <section class="kpis" id="kpis" aria-label="Indicadores"></section>
+  <section class="insights" id="insights" aria-label="Hallazgos"></section>
+
+  <div class="grid">
+    <section class="panel span-12">
+      <div class="ph">
+        <div><h2 id="trendTitle">Evolución del gasto</h2><div class="sub" id="trendSub"></div></div>
+        <div class="seg" id="gran">
+          <button data-v="M" aria-pressed="true">Mes</button>
+          <button data-v="Q" aria-pressed="false">Trimestre</button>
+          <button data-v="Y" aria-pressed="false">Año</button>
+        </div>
+      </div>
+      <div class="legend" id="legend" aria-label="Cuentas (clic para filtrar)"></div>
+      <div class="chart" id="cTrend" style="height:380px"></div>
+    </section>
+
+    <section class="panel span-7">
+      <div class="ph"><div><h2>Mapa del gasto por niveles</h2><div class="sub">Nivel 1 → Nivel 5. Cada bloque tiene el tamaño de su gasto; clic en un bloque para entrar a sus subcuentas, clic en la ruta superior para volver.</div></div></div>
+      <div class="chart" id="cTree" style="height:460px"></div>
+      <p class="note" id="treeNote"></p>
+    </section>
+
+    <section class="panel span-5">
+      <div class="ph">
+        <div><h2 id="rankTitle">Ranking</h2><div class="sub" id="rankSub"></div></div>
+        <div class="seg" id="rankN"><button data-v="15" aria-pressed="true">Top 15</button><button data-v="all" aria-pressed="false">Todas</button></div>
+      </div>
+      <div style="overflow-y:auto;max-height:480px"><div class="chart" id="cRank" style="height:420px"></div></div>
+    </section>
+
+    <section class="panel span-12">
+      <div class="ph"><div><h2 id="heatTitle">Tendencia por cuenta y año</h2><div class="sub" id="heatSub"></div></div></div>
+      <div style="overflow-x:auto"><div class="chart" id="cHeat" style="height:520px;min-width:640px"></div></div>
+    </section>
+
+    <section class="panel span-6">
+      <div class="ph"><div><h2>Qué subió y qué bajó</h2><div class="sub" id="varSub"></div></div></div>
+      <div class="chart" id="cVar" style="height:440px"></div>
+    </section>
+
+    <section class="panel span-6">
+      <div class="ph"><div><h2>Principales terceros</h2><div class="sub">Proveedores y personas con mayor valor. Excluye la nómina (interfases de nómina) y los asientos sin tercero. Clic para filtrar.</div></div></div>
+      <div class="chart" id="cTer" style="height:440px"></div>
+    </section>
+
+    <section class="panel span-12">
+      <div class="ph">
+        <div><h2>Detalle de movimientos</h2><div class="sub" id="tblSub"></div></div>
+      </div>
+      <div class="tbl-wrap" style="max-height:620px">
+        <table id="tbl">
+          <thead><tr>
+            <th data-k="d" tabindex="0">Fecha</th>
+            <th data-k="n5" tabindex="0">Cuenta (Nivel 5 y ruta)</th>
+            <th data-k="ter" tabindex="0">Tercero</th>
+            <th data-k="pr" tabindex="0">Proyecto</th>
+            <th data-k="c" tabindex="0">Comentario</th>
+            <th data-k="td" tabindex="0">Documento</th>
+            <th data-k="v" class="r" tabindex="0">Valor</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pager"><span id="pgInfo"></span><div class="btns"><button class="btn" id="pgPrev">Anterior</button><button class="btn" id="pgNext">Siguiente</button></div></div>
+    </section>
+  </div>
+
+  <footer>
+    Fuente: reporte contable cargado por el administrador. Valor: <span class="mono">CON_SaldoAdministrativo</span>. Niveles: <span class="mono">CON_CuentaNivel_1</span> a <span class="mono">CON_CuentaNivel_5</span>, con los nombres tal como vienen en el reporte. Por defecto se muestra el libro NIIF (<span class="mono">CON_AreaValoracion</span> Común + IFRS): las depreciaciones se registran tanto en IFRS como en libro local, y sumar ambos las duplicaría. Valores negativos corresponden a reversiones, descuentos o ajustes. En las gráficas por cuenta se muestran con color las 7 cuentas de mayor valor del nivel elegido; el resto se agrupa en gris como “Demás cuentas”.
+  </footer>
+</div>
+</div>
+<div id="adminApp" hidden>
+<header class="band">
+  <div class="band-top">
+    <div class="wordmark" aria-label="TOPTEC, Es fácil construir"><b>TOPTEC</b><span>Es fácil construir</span></div>
+    <div class="userbar" id="adminUserbar"></div>
+  </div>
+  <div class="band-in">
+    <div class="band-title">
+      <div class="eyebrow">Tablero de gastos</div>
+      <h1>Administración</h1>
+      <p>Carga el reporte contable, agrega usuarios y asigna a cada uno las áreas (centros de costo) que puede ver.</p>
+    </div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="seg admin-tabs" id="tabs" role="tablist">
+    <button type="button" data-t="datos" aria-pressed="true">Cargar datos</button>
+    <button type="button" data-t="usuarios" aria-pressed="false">Usuarios <span class="count" id="usersCount"></span></button>
+    <button type="button" data-t="areas" aria-pressed="false">Áreas <span class="count" id="areasCount"></span></button>
+  </div>
+
+  <!-- Cargar datos -->
+  <section id="tab-datos" class="adm-grid">
+    <div class="panel">
+      <h2>1. Elige el reporte</h2>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Elegir archivo de Excel">
+        <b>Arrastra aquí el Excel o haz clic para elegirlo</b>
+        <span class="hint">.xlsx, .xls o .csv · se lee la primera hoja</span>
+      </div>
+      <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
+      <p class="note">Columnas obligatorias: <span id="reqCols"></span>. El archivo se procesa en tu navegador; solo se suben los datos que usa el tablero.</p>
+      <p class="note">Cada área (centro de costo) que venga en el archivo reemplaza por completo sus datos anteriores. Las áreas que no vengan se conservan, salvo que marques eliminarlas.</p>
+    </div>
+    <div class="panel">
+      <div class="ph"><h2>2. Revisa y publica</h2><button type="button" class="btn-primary" id="publish" disabled>Publicar datos</button></div>
+      <p class="file-info" id="fileInfo">Todavía no has elegido un archivo.</p>
+      <div id="preview"></div>
+      <ul class="log" id="log" aria-live="polite"></ul>
+    </div>
+  </section>
+
+  <!-- Usuarios -->
+  <section id="tab-usuarios" class="adm-grid" hidden>
+    <div class="panel">
+      <div class="ph"><h2 id="formTitle">Agregar usuario</h2><button type="button" class="btn sm" id="uNew">Nuevo</button></div>
+      <form id="userForm" class="uform" novalidate>
+        <label class="f-l" for="uEmail">Correo</label>
+        <input type="email" id="uEmail" autocomplete="off" required placeholder="nombre@empresa.com">
+        <label class="f-l" for="uName">Nombre</label>
+        <input type="text" id="uName" autocomplete="off" placeholder="Opcional">
+        <label class="f-l" for="uPass" id="uPassLbl">Contraseña temporal</label>
+        <div class="pw-row"><input type="text" id="uPass" autocomplete="off" spellcheck="false" placeholder="Mínimo 8 caracteres"><button type="button" class="btn sm" id="uGen">Generar</button></div>
+        <span class="hint" id="uPassHint">Se la das al usuario; al entrar por primera vez tendrá que cambiarla.</span>
+        <label class="f-l" for="uRole">Rol</label>
+        <select id="uRole">
+          <option value="viewer">Usuario: ve solo sus áreas</option>
+          <option value="admin">Administrador: carga datos y gestiona usuarios</option>
+        </select>
+        <label class="check"><input type="checkbox" id="uActive" checked> Acceso activo</label>
+        <div class="ph"><label class="f-l" for="areaQ">Áreas que puede ver</label><span class="hint" id="areaPickNote"></span></div>
+        <input type="text" id="areaQ" placeholder="Buscar área…" autocomplete="off">
+        <div class="row-actions"><button type="button" class="linkbtn" id="pickAll">Seleccionar visibles</button><button type="button" class="linkbtn" id="pickNone">Quitar selección</button></div>
+        <div class="pick" id="areaPick"></div>
+        <button type="submit" class="btn-primary">Guardar usuario</button>
+        <p class="form-msg" id="uMsg" role="status"></p>
+      </form>
+      <p class="note">El usuario entra con su correo y la contraseña temporal; el sistema le pide cambiarla al primer ingreso. Para asignarle una contraseña nueva más adelante, primero borra su cuenta en Firebase → Authentication → Usuarios y luego escríbela aquí y guarda.</p>
+    </div>
+    <div class="panel">
+      <h2>Usuarios con acceso</h2>
+      <div class="tbl-wrap"><table><thead><tr><th>Correo</th><th>Rol</th><th>Áreas</th><th>Estado</th><th></th></tr></thead><tbody id="usersBody"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- Áreas -->
+  <section id="tab-areas" hidden>
+    <div class="panel" style="margin-top:14px">
+      <h2>Áreas cargadas</h2>
+      <div class="tbl-wrap"><table><thead><tr><th>Área (centro de costo)</th><th class="r">Movimientos</th><th class="r">Total</th><th>Rango</th><th>Actualizada</th><th class="r">Usuarios</th><th></th></tr></thead><tbody id="areasBody"></tbody></table></div>
+    </div>
+  </section>
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, initializeAuth, inMemoryPersistence, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc, updateDoc, collection, getDocs, setDoc, deleteDoc, query, where, writeBatch, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+const __m = {};
+
+/* ==========================================================================
+   CONFIGURACIÓN: pega aquí la configuración web de tu proyecto de Firebase
+   (busca "firebaseConfig" justo abajo). Es lo único que hay que editar.
+   ========================================================================== */
+__m['config'] = (() => {
+/*
+ * Configuración del sitio.
+ * 1) Pega aquí la configuración web de tu proyecto de Firebase
+ *    (Consola de Firebase → Configuración del proyecto → Tus apps → App web).
+ *    Estos valores son públicos por diseño: la seguridad de los datos la dan las reglas de Firestore.
+ */
+const firebaseConfig = {
+  apiKey: 'AIzaSyAIaXs7o4kXGpWSrCeUjiLE0sP6LIgJB7Q',
+  authDomain: 'gastos-areas.firebaseapp.com',
+  projectId: 'gastos-areas',
+  storageBucket: 'gastos-areas.firebasestorage.app',
+  messagingSenderId: '426590583172',
+  appId: '1:426590583172:web:0fd9b7f5dbe2c9dba905d1',
+  measurementId: 'G-3TB50T477P',
+};
+
+const APP = {
+  company: 'TOPTEC',
+  tagline: 'Es fácil construir',
+  // Título del tablero: "<titlePrefix> <área>"
+  titlePrefix: 'Gastos',
+  // Nombres cortos opcionales por id de centro de costo (CON_CEN_IdCentroCosto), usados en el título.
+  areaAliases: {
+    '30010106': 'I+D',
+  },
+};
+
+return { firebaseConfig, APP };
+})();
+
+/* ===== firebase.js ===== */
+__m['firebase'] = (() => {
+/* Inicialización de Firebase y utilidades compartidas. */
+
+
+
+const { firebaseConfig } = __m['config'];
+
+const configured = !String(firebaseConfig.apiKey).startsWith('REEMPLAZAR');
+const app = configured ? initializeApp(firebaseConfig) : null;
+const auth = app ? getAuth(app) : null;
+if (auth) auth.languageCode = 'es';
+const db = app ? getFirestore(app) : null;
+
+/** Los usuarios se guardan con el correo en minúsculas como id del documento. */
+const emailKey = e => String(e || '').trim().toLowerCase();
+
+/** Perfil del usuario en Firestore (users/{correo}) o null si no está autorizado. */
+async function getProfile(user) {
+  try {
+    const snap = await getDoc(doc(db, 'users', emailKey(user.email)));
+    return snap.exists() ? snap.data() : null;
+  } catch (e) {
+    if (e.code === 'permission-denied') return null;
+    throw e;
+  }
+}
+
+/** El usuario marca que ya cambió su contraseña temporal (las reglas solo le permiten tocar este campo). */
+const clearMustChange = user => updateDoc(doc(db, 'users', emailKey(user.email)), { mustChangePassword: false });
+
+/*
+ * El administrador crea la cuenta de acceso de otra persona sin cerrar su propia sesión:
+ * se usa una segunda instancia de Firebase con sesión solo en memoria.
+ */
+let secondAuth;
+async function createAccount(email, password) {
+  if (!secondAuth) secondAuth = initializeAuth(initializeApp(firebaseConfig, 'crear-usuarios'), { persistence: inMemoryPersistence });
+  await createUserWithEmailAndPassword(secondAuth, emailKey(email), password);
+  await signOut(secondAuth);
+}
+
+
+
+return { onAuthStateChanged, signOut, signInWithEmailAndPassword, updatePassword, configured, app, auth, db, emailKey, getProfile, clearMustChange, createAccount };
+})();
+
+/* ===== prep.js ===== */
+__m['prep'] = (() => {
+/*
+ * Lectura del Excel contable y preparación de los datos por área (centro de costo).
+ * No depende de Firebase: recibe un archivo y devuelve, por área, los bloques de texto que se guardan.
+ */
+const XLSX_URL = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs';
+
+/** Columnas del reporte contable que usa el tablero. */
+const COLS = {
+  areaId: 'CON_CEN_IdCentroCosto',
+  areaName: 'CON_CentroCosto',
+  date: 'CON_FechaContabilizacion',
+  value: 'CON_SaldoAdministrativo',
+  n1: 'CON_CuentaNivel_1', n2: 'CON_CuentaNivel_2', n3: 'CON_CuentaNivel_3', n4: 'CON_CuentaNivel_4', n5: 'CON_CuentaNivel_5',
+  ter: 'CON_Tercero', pr: 'CON_Proyecto', av: 'CON_AreaValoracion', td: 'CON_TipoDocumentoOrigen',
+  c: 'CON_Comentario', num: 'CON_NumeroOrigen',
+};
+const REQUIRED = ['areaId', 'areaName', 'date', 'value', 'n1', 'n2', 'n3', 'n4', 'n5'];
+/** Orden de columnas de cada fila guardada; las de DIM_KEYS se guardan como índice a una lista de nombres. */
+const KEYS = ['d', 'n1', 'n2', 'n3', 'n4', 'n5', 'ter', 'pr', 'av', 'td', 'v', 'c', 'num'];
+const DIM_KEYS = ['n1', 'n2', 'n3', 'n4', 'n5', 'ter', 'pr', 'av', 'td'];
+
+// Firestore admite documentos de hasta 1 MiB; dejamos margen.
+const MAX_CHUNK_BYTES = 850_000;
+const enc = new TextEncoder();
+
+let XLSX;
+async function lib() { return XLSX || (XLSX = await import(XLSX_URL)); }
+
+/** Lee la primera hoja del archivo (.xlsx, .xls o .csv) como lista de objetos por fila. */
+async function readWorkbook(file) {
+  const X = await lib();
+  const buf = await file.arrayBuffer();
+  const wb = X.read(buf, { type: 'array', cellDates: false, dense: true });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const rows = X.utils.sheet_to_json(ws, { defval: null, raw: true });
+  return { sheet: wb.SheetNames[0], rows, parseDate: v => toISO(v, X) };
+}
+
+function toISO(v, X) {
+  if (v == null || v === '') return null;
+  if (typeof v === 'number') {
+    const p = X.SSF.parse_date_code(v);
+    if (!p) return null;
+    return `${p.y}-${String(p.m).padStart(2, '0')}-${String(p.d).padStart(2, '0')}`;
+  }
+  if (v instanceof Date) return `${v.getFullYear()}-${String(v.getMonth() + 1).padStart(2, '0')}-${String(v.getDate()).padStart(2, '0')}`;
+  const s = String(v).trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); // dd/mm/aaaa
+  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  return null;
+}
+
+const str = v => (v == null ? '' : String(v).trim());
+function num(v) {
+  if (typeof v === 'number') return v;
+  if (v == null || v === '') return NaN;
+  const s = String(v).trim().replace(/\s/g, '');
+  // admite 1234.56, 1.234,56 y 1,234.56
+  const norm = /,\d{1,2}$/.test(s) ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  return Number(norm);
+}
+
+/**
+ * Agrupa las filas por centro de costo y arma los bloques a guardar.
+ * Devuelve { areas: [{id, name, rows, total, minDate, maxDate, chunks:[string]}], skipped, missing }.
+ */
+function buildAreas(records, parseDate) {
+  const first = records[0] || {};
+  const missing = REQUIRED.filter(k => !(COLS[k] in first)).map(k => COLS[k]);
+  if (missing.length) return { areas: [], skipped: 0, missing };
+
+  const groups = new Map();
+  const skipped = { sinArea: 0, sinFecha: 0, sinValor: 0 };
+  for (const r of records) {
+    const id = str(r[COLS.areaId]);
+    if (!id) { skipped.sinArea++; continue; }
+    const d = parseDate(r[COLS.date]);
+    if (!d) { skipped.sinFecha++; continue; }
+    const v = num(r[COLS.value]);
+    if (!Number.isFinite(v)) { skipped.sinValor++; continue; }
+    let g = groups.get(id);
+    if (!g) groups.set(id, g = { id, name: '', recs: [] });
+    if (!g.name) g.name = str(r[COLS.areaName]);
+    g.recs.push({
+      d, v: Math.round(v * 100) / 100,
+      n1: str(r[COLS.n1]), n2: str(r[COLS.n2]), n3: str(r[COLS.n3]), n4: str(r[COLS.n4]), n5: str(r[COLS.n5]),
+      ter: str(r[COLS.ter]), pr: str(r[COLS.pr]), av: str(r[COLS.av]), td: str(r[COLS.td]),
+      c: str(r[COLS.c]), num: str(r[COLS.num]),
+    });
+  }
+
+  const areas = [...groups.values()].map(g => {
+    g.recs.sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : 0));
+    let total = 0;
+    for (const r of g.recs) total += r.v;
+    return {
+      id: g.id, name: g.name || g.id, rows: g.recs.length, total: Math.round(total * 100) / 100,
+      minDate: g.recs[0].d, maxDate: g.recs[g.recs.length - 1].d,
+      chunks: chunkRecords(g.recs),
+    };
+  }).sort((a, b) => a.id.localeCompare(b.id, 'es', { numeric: true }));
+  return { areas, skipped, missing: [] };
+}
+
+/** Serializa un grupo de filas como bloque autocontenido {keys, dims, rows}. */
+function encodeChunk(recs) {
+  const dims = {}, maps = {};
+  for (const k of DIM_KEYS) { dims[k] = []; maps[k] = new Map(); }
+  const rows = recs.map(r => KEYS.map(k => {
+    if (!maps[k]) return r[k];
+    let i = maps[k].get(r[k]);
+    if (i === undefined) { i = dims[k].length; dims[k].push(r[k]); maps[k].set(r[k], i); }
+    return i;
+  }));
+  return JSON.stringify({ keys: KEYS, dims, rows });
+}
+
+function chunkRecords(recs) {
+  const out = [];
+  const split = list => {
+    const s = encodeChunk(list);
+    if (enc.encode(s).length <= MAX_CHUNK_BYTES || list.length < 2) { out.push(s); return; }
+    const mid = Math.ceil(list.length / 2);
+    split(list.slice(0, mid)); split(list.slice(mid));
+  };
+  // primer corte aproximado por cantidad de filas, luego se ajusta por tamaño real
+  for (let i = 0; i < recs.length; i += 8000) split(recs.slice(i, i + 8000));
+  return out;
+}
+
+/** Une los bloques de varias áreas en un solo dataset para el tablero (agrega la columna "ar" = área). */
+function mergeChunks(parts) {
+  const dims = { ar: [] };
+  const maps = { ar: new Map() };
+  for (const k of DIM_KEYS) { dims[k] = []; maps[k] = new Map(); }
+  const gi = (k, label) => {
+    let i = maps[k].get(label);
+    if (i === undefined) { i = dims[k].length; dims[k].push(label); maps[k].set(label, i); }
+    return i;
+  };
+  const rows = [];
+  for (const { areaLabel, chunk } of parts) {
+    const ar = gi('ar', areaLabel);
+    const local = chunk.keys.map(k => (DIM_KEYS.includes(k) ? chunk.dims[k].map(l => gi(k, l)) : null));
+    for (const r of chunk.rows) {
+      const o = [ar];
+      for (let j = 0; j < r.length; j++) o.push(local[j] ? local[j][r[j]] : r[j]);
+      rows.push(o);
+    }
+  }
+  return { keys: ['ar', ...KEYS], dims, rows };
+}
+
+return { COLS, REQUIRED, KEYS, DIM_KEYS, readWorkbook, buildAreas, mergeChunks };
+})();
+
+/* ===== store.js ===== */
+__m['store'] = (() => {
+/*
+ * Acceso a Firestore.
+ *   users/{correo}                 → { email, name, role: 'admin'|'viewer', areas: [idCentroCosto], active }
+ *   areas/{idCentroCosto}          → { name, rows, total, minDate, maxDate, nChunks, version, updatedAt, updatedBy }
+ *   areas/{id}/chunks/{version_i}  → { v: version, i, data: '<json>' }
+ * Las reglas (firestore.rules) solo dejan leer un área a quien la tiene asignada o al admin.
+ */
+
+const { db, emailKey } = __m['firebase'];
+const { mergeChunks } = __m['prep'];
+
+const enc = new TextEncoder();
+
+/* ---------- áreas ---------- */
+async function listAreas() {
+  const snap = await getDocs(collection(db, 'areas'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => a.id.localeCompare(b.id, 'es', { numeric: true }));
+}
+
+const areaLabel = a => `${a.id} - ${a.name || a.id}`;
+
+/** Descarga y une los datos de las áreas indicadas. */
+async function loadAreaData(ids, onProgress = () => {}) {
+  const parts = [], metas = [];
+  let n = 0;
+  for (const id of ids) {
+    const meta = await getDoc(doc(db, 'areas', id));
+    n++;
+    if (!meta.exists()) continue;
+    const a = { id, ...meta.data() };
+    metas.push(a);
+    onProgress(`Cargando ${areaLabel(a)} (${n} de ${ids.length})…`);
+    const snap = await getDocs(query(collection(db, 'areas', id, 'chunks'), where('v', '==', a.version)));
+    const chunks = snap.docs.map(d => d.data()).sort((x, y) => x.i - y.i);
+    for (const c of chunks) parts.push({ areaLabel: areaLabel(a), chunk: JSON.parse(c.data) });
+  }
+  return { raw: mergeChunks(parts), areas: metas };
+}
+
+async function deleteChunks(id, keepVersion) {
+  const base = collection(db, 'areas', id, 'chunks');
+  const snap = await getDocs(keepVersion ? query(base, where('v', '!=', keepVersion)) : base);
+  for (let i = 0; i < snap.docs.length; i += 400) {
+    const b = writeBatch(db);
+    snap.docs.slice(i, i + 400).forEach(d => b.delete(d.ref));
+    await b.commit();
+  }
+  return snap.size;
+}
+
+/**
+ * Publica las áreas preparadas por prep.buildAreas.
+ * Escribe la versión nueva, la activa en el documento del área y luego borra la versión anterior,
+ * así los usuarios nunca ven un área a medio cargar.
+ */
+async function publishAreas(areas, { by, onLog = () => {} }) {
+  for (const a of areas) {
+    const version = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    onLog(`${areaLabel(a)}: subiendo ${a.chunks.length} bloque(s)…`);
+    let batch = writeBatch(db), bytes = 0, ops = 0;
+    for (let i = 0; i < a.chunks.length; i++) {
+      const size = enc.encode(a.chunks[i]).length;
+      if (ops && (bytes + size > 8_000_000 || ops >= 400)) { await batch.commit(); batch = writeBatch(db); bytes = 0; ops = 0; }
+      batch.set(doc(db, 'areas', a.id, 'chunks', `${version}_${String(i).padStart(4, '0')}`), { v: version, i, data: a.chunks[i] });
+      bytes += size; ops++;
+    }
+    if (ops) await batch.commit();
+    await setDoc(doc(db, 'areas', a.id), {
+      name: a.name, rows: a.rows, total: a.total, minDate: a.minDate, maxDate: a.maxDate,
+      nChunks: a.chunks.length, version, updatedAt: serverTimestamp(), updatedBy: by,
+    });
+    const removed = await deleteChunks(a.id, version);
+    onLog(`${areaLabel(a)}: listo (${a.rows.toLocaleString('es-CO')} movimientos${removed ? `, ${removed} bloque(s) anteriores eliminados` : ''}).`, 'ok');
+  }
+}
+
+async function deleteArea(id) {
+  await deleteChunks(id, null);
+  await deleteDoc(doc(db, 'areas', id));
+}
+
+/* ---------- usuarios ---------- */
+async function listUsers() {
+  const snap = await getDocs(collection(db, 'users'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.id.localeCompare(b.id));
+}
+
+async function saveUser({ email, name, role, areas, active, mustChangePassword }, by) {
+  const id = emailKey(email);
+  const prev = await getDoc(doc(db, 'users', id));
+  await setDoc(doc(db, 'users', id), {
+    email: id, name: String(name || '').trim(), role: role === 'admin' ? 'admin' : 'viewer',
+    areas: [...new Set(areas || [])].map(String), active: active !== false,
+    updatedAt: serverTimestamp(), updatedBy: by,
+    ...(mustChangePassword ? { mustChangePassword: true } : {}),
+    ...(prev.exists() ? {} : { createdAt: serverTimestamp(), createdBy: by }),
+  }, { merge: true });
+}
+
+const deleteUser = email => deleteDoc(doc(db, 'users', emailKey(email)));
+
+return { listAreas, areaLabel, loadAreaData, publishAreas, deleteArea, listUsers, saveUser, deleteUser };
+})();
+
+/* ===== auth-ui.js ===== */
+__m['auth-ui'] = (() => {
+/* Pantalla de acceso compartida por el tablero y el panel de administración. */
+const { APP } = __m['config'];
+const { configured, auth, getProfile, clearMustChange, onAuthStateChanged, signOut, signInWithEmailAndPassword, updatePassword } = __m['firebase'];
+
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ERR = {
+  'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+  'auth/wrong-password': 'Correo o contraseña incorrectos.',
+  'auth/user-not-found': 'Correo o contraseña incorrectos.',
+  'auth/invalid-email': 'Escribe un correo válido.',
+  'auth/missing-password': 'Escribe tu contraseña.',
+  'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+  'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
+  'auth/requires-recent-login': 'Por seguridad, vuelve a entrar y cambia la contraseña de inmediato.',
+  'auth/network-request-failed': 'No hay conexión con el servidor. Revisa tu internet.',
+};
+const msgOf = e => ERR[e?.code] || (e?.message ?? String(e));
+
+function shell(inner, overlay = false) {
+  const box = document.getElementById('auth');
+  box.hidden = false;
+  box.classList.toggle('overlay', overlay);
+  box.innerHTML = `<div class="auth-card">
+    <div class="auth-brand"><b>${esc(APP.company)}</b><span>${esc(APP.tagline)}</span></div>
+    <div class="auth-body">${inner}</div></div>`;
+  return box;
+}
+const hideAuth = () => { const b = document.getElementById('auth'); b.hidden = true; b.innerHTML = ''; b.classList.remove('overlay'); };
+
+function loginForm() {
+  const box = shell(`
+    <h2>Ingresa a tu tablero</h2>
+    <p class="auth-sub">Usa tu correo empresarial y la contraseña que te dio el administrador. Solo verás la información de tus áreas.</p>
+    <form id="pwForm" class="auth-form" novalidate>
+      <label for="aEmail">Correo empresarial</label><input id="aEmail" type="email" autocomplete="username" required>
+      <label for="aPass">Contraseña</label><input id="aPass" type="password" autocomplete="current-password" required>
+      <button type="submit" class="btn-primary">Entrar</button>
+    </form>
+    <p class="hint">¿Olvidaste tu contraseña o no tienes acceso? Pídele al administrador del tablero que te asigne una.</p>
+    <p class="auth-msg" id="aMsg" role="status"></p>`);
+  const say = t => { box.querySelector('#aMsg').textContent = t; };
+  box.querySelector('#aEmail').focus();
+  box.querySelector('#pwForm').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    say('');
+    const btn = box.querySelector('button[type=submit]');
+    btn.disabled = true;
+    try { await signInWithEmailAndPassword(auth, box.querySelector('#aEmail').value.trim(), box.querySelector('#aPass').value); }
+    catch (e) { say(msgOf(e)); btn.disabled = false; }
+  });
+}
+
+/** Formulario para cambiar la contraseña. Resuelve true si se cambió, false si se canceló. */
+function changePasswordForm(user, { first = false, overlay = false } = {}) {
+  return new Promise(resolve => {
+    const box = shell(`
+      <h2>${first ? 'Crea tu contraseña' : 'Cambiar contraseña'}</h2>
+      <p class="auth-sub">${first ? 'Entraste con una contraseña temporal. Elige una nueva para seguir; solo tú la conocerás.' : `Nueva contraseña para <b>${esc(user.email)}</b>.`}</p>
+      <form id="cpForm" class="auth-form" novalidate>
+        <label for="cp1">Nueva contraseña</label><input id="cp1" type="password" autocomplete="new-password" minlength="8" required>
+        <label for="cp2">Repítela</label><input id="cp2" type="password" autocomplete="new-password" minlength="8" required>
+        <button type="submit" class="btn-primary">Guardar contraseña</button>
+      </form>
+      <div class="auth-links">${first ? '<button type="button" class="linkbtn" id="cpOut">Cerrar sesión</button>' : '<button type="button" class="linkbtn" id="cpCancel">Cancelar</button>'}</div>
+      <p class="auth-msg" id="aMsg" role="status"></p>`, overlay);
+    const say = t => { box.querySelector('#aMsg').textContent = t; };
+    box.querySelector('#cp1').focus();
+    box.querySelector('#cpOut')?.addEventListener('click', () => signOut(auth));
+    box.querySelector('#cpCancel')?.addEventListener('click', () => { hideAuth(); resolve(false); });
+    box.querySelector('#cpForm').addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const p1 = box.querySelector('#cp1').value, p2 = box.querySelector('#cp2').value;
+      if (p1.length < 8) return say('Usa al menos 8 caracteres.');
+      if (p1 !== p2) return say('Las dos contraseñas no coinciden.');
+      try {
+        await updatePassword(user, p1);
+        if (first) await clearMustChange(user);
+        hideAuth();
+        resolve(true);
+      } catch (e) {
+        say(msgOf(e));
+        if (e.code === 'auth/requires-recent-login') setTimeout(() => signOut(auth), 2500);
+      }
+    });
+  });
+}
+
+function blocked(title, text, actions = '') {
+  const box = shell(`<h2>${title}</h2><p class="auth-sub">${text}</p>
+    <div class="auth-actions">${actions}<button type="button" class="btn" id="outBtn">Cerrar sesión</button></div>`);
+  box.querySelector('#outBtn').addEventListener('click', () => signOut(auth));
+  return box;
+}
+
+/**
+ * Espera a que haya una sesión válida y autorizada. Resuelve con { user, profile }.
+ * Si el usuario entró con contraseña temporal, le pide crear una nueva antes de seguir.
+ */
+function requireSession() {
+  return new Promise(resolve => {
+    if (!configured) {
+      shell('<h2>Falta configurar Firebase</h2><p class="auth-sub">Pega la configuración web de tu proyecto en el bloque CONFIGURACIÓN del archivo y vuelve a cargar la página.</p>');
+      return;
+    }
+    let done = false;
+    onAuthStateChanged(auth, async user => {
+      if (done) { if (!user) location.reload(); return; }
+      if (!user) { loginForm(); return; }
+      shell('<p class="auth-sub">Verificando acceso…</p>');
+      let profile;
+      try { profile = await getProfile(user); }
+      catch (e) { blocked('No se pudo verificar tu acceso', esc(msgOf(e))); return; }
+      if (!profile || profile.active === false) {
+        blocked('Sin acceso', `El correo <b>${esc(user.email)}</b> no tiene acceso a este tablero. Pide al administrador que te agregue.`);
+        return;
+      }
+      if (profile.mustChangePassword) {
+        if (!(await changePasswordForm(user, { first: true }))) return;
+        profile = { ...profile, mustChangePassword: false };
+      }
+      done = true;
+      hideAuth();
+      resolve({ user, profile });
+    });
+  });
+}
+
+/** Barra de usuario (correo, enlaces, cambiar contraseña y salir) dentro del encabezado. */
+function renderUserbar(el, { user, profile }, links = []) {
+  el.innerHTML = `<span>${esc(user.email)}${profile.role === 'admin' ? ' · admin' : ''}</span>
+    ${links.map(l => `<a href="${l.href}">${esc(l.text)}</a>`).join('')}
+    <button type="button" class="linkbtn" data-pw>Cambiar contraseña</button>
+    <button type="button" class="linkbtn" data-out>Cerrar sesión</button>`;
+  el.querySelector('[data-out]').addEventListener('click', () => signOut(auth));
+  el.querySelector('[data-pw]').addEventListener('click', () => changePasswordForm(user, { overlay: true }));
+}
+
+return { changePasswordForm, requireSession, renderUserbar };
+})();
+
+/* ===== dashboard.js ===== */
+__m['dashboard'] = (() => {
+/* Dashboard de gastos: recibe el dataset ya filtrado por las áreas del usuario y dibuja todo. */
+function startDashboard(RAW){
+const D = RAW.dims;
+const LV=[1,2,3,4,5];
+// level 0 = área (centro de costo); only filtered, never used as an account level
+const FLV=[0,1,2,3,4,5];
+D.n0 = D.ar || [''];
+const MULTI_AREA = D.n0.length > 1;
+const lvName = l => l===0 ? 'Área' : 'Nivel '+l;
+const MES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const ROWS = RAW.rows.map(r=>{const o={};RAW.keys.forEach((k,i)=>o[k]=r[i]);
+  o.n0=o.ar||0;o.ym=o.d.slice(0,7);o.y=+o.d.slice(0,4);o.avl=D.av[o.av];
+  o.search=(FLV.map(l=>D['n'+l][o['n'+l]]).join(' ')+' '+D.ter[o.ter]+' '+o.c+' '+D.pr[o.pr]+' '+o.num).toLowerCase();return o;});
+const MIND=ROWS.reduce((a,o)=>o.d<a?o.d:a,'9999'), MAXD=ROWS.reduce((a,o)=>o.d>a?o.d:a,'0000');
+function ymAdd(ym,n){let y=+ym.slice(0,4),m=+ym.slice(5)-1+n;y+=Math.floor(m/12);m=((m%12)+12)%12;return y+'-'+String(m+1).padStart(2,'0');}
+const MONTHS=[];for(let m=MIND.slice(0,7);m<=MAXD.slice(0,7);m=ymAdd(m,1))MONTHS.push(m);
+const lastDay=ym=>{const [y,m]=ym.split('-').map(Number);return ym+'-'+String(new Date(y,m,0).getDate()).padStart(2,'0');};
+const ymLabel=ym=>MES[+ym.slice(5)-1]+' '+ym.slice(0,4);
+const PARTIAL_MONTH = MAXD < lastDay(MAXD.slice(0,7)) ? MAXD.slice(0,7) : null;
+const fmtDate=d=>+d.slice(8)+' '+MES[+d.slice(5,7)-1]+' '+d.slice(0,4);
+
+/* account helpers: label exactly as reported */
+const lab=(l,i)=>D['n'+l][i];
+const short=(s,max=34)=>s.length<=max?s:s.slice(0,max-1).trimEnd()+'…';
+// parent chain of each account at each level (taken from the data itself)
+const PARENT={};LV.forEach(l=>PARENT[l]=new Map());
+for(const o of ROWS)for(const l of LV)if(!PARENT[l].has(o['n'+l]))PARENT[l].set(o['n'+l],LV.filter(k=>k<l).map(k=>o['n'+k]));
+const pathOf=(l,i)=>PARENT[l].get(i).map((p,k)=>lab(k+1,p));
+
+/* stable colors: top 7 accounts per level by all-time NIIF total; the rest share "Demás cuentas" */
+const COLOR_SLOT={};
+LV.forEach(l=>{const m=new Map();for(const o of ROWS){if(o.avl==='Local')continue;const k=o['n'+l];m.set(k,(m.get(k)||0)+o.v);}
+  COLOR_SLOT[l]=new Map([...m].sort((a,b)=>b[1]-a[1]).slice(0,7).map(([k],i)=>[k,i]));});
+
+const nf1=new Intl.NumberFormat('es-CO',{maximumFractionDigits:1,minimumFractionDigits:1});
+const nf0=new Intl.NumberFormat('es-CO',{maximumFractionDigits:0});
+const fM=v=>(v<0?'−':'')+'$'+(Math.abs(v)>=1e7||Math.abs(v)<1e3?nf1:new Intl.NumberFormat('es-CO',{maximumFractionDigits:2})).format(Math.abs(v)/1e6)+' M';
+const fCOP=v=>(v<0?'−':'')+'$'+nf0.format(Math.abs(Math.round(v)));
+const fPct=(v,d=1)=>new Intl.NumberFormat('es-CO',{maximumFractionDigits:d,minimumFractionDigits:d}).format(v*100)+' %';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const DEFAULT=()=>({lvl:5,sel:{0:new Set(),1:new Set(),2:new Set(),3:new Set(),4:new Set(),5:new Set()},from:MONTHS[0],to:MONTHS[MONTHS.length-1],libro:'niif',ter:null,proj:'all',q:'',gran:'M',rankN:'15',sort:{k:'d',dir:-1},page:0});
+let S=DEFAULT();
+
+function passBase(o,s){
+  if(s.libro==='niif'&&o.avl==='Local')return false;
+  if(s.libro==='local'&&o.avl==='IFRS')return false;
+  for(const l of FLV)if(s.sel[l].size&&!s.sel[l].has(o['n'+l]))return false;
+  if(s.ter!==null&&o.ter!==s.ter)return false;
+  if(s.proj!=='all'&&o.pr!==+s.proj)return false;
+  if(s.q&&!s.q.split(/\s+/).every(t=>o.search.includes(t)))return false;
+  return true;}
+const inRange=(o,s)=>o.ym>=s.from&&o.ym<=s.to;
+const cutTo=s=>lastDay(s.to)<MAXD?lastDay(s.to):MAXD;
+function prevWindow(s){const pf=ymAdd(s.from,-12);if(pf<MIND.slice(0,7))return null;
+  const shift=d=>(+d.slice(0,4)-1)+d.slice(4);return {from:shift(s.from+'-01'),to:shift(cutTo(s))};}
+
+/* selecting an account: set it and its parents, clear deeper levels */
+function selAccount(l,i,drill){const sel={...S.sel};const par=PARENT[l].get(i)||[];par.forEach((p,k)=>{if(sel[k+1].size&&!sel[k+1].has(p))sel[k+1]=new Set([p]);});sel[l]=new Set([i]);for(let k=l+1;k<=5;k++)sel[k]=new Set();
+  set({sel,lvl:drill&&l<5?Math.max(S.lvl,l+1):S.lvl});}
+function clearLevel(l){const sel={...S.sel};if(l===0)sel[0]=new Set();else for(let k=l;k<=5;k++)sel[k]=new Set();set({sel});}
+/* accounts available at level l given the selections of the levels above it */
+function optionsFor(l,sel){const m=new Set();
+  for(const o of ROWS){if(S.libro==='niif'&&o.avl==='Local')continue;if(S.libro==='local'&&o.avl==='IFRS')continue;
+    let ok=true;for(let k=0;k<l;k++)if(sel[k].size&&!sel[k].has(o['n'+k])){ok=false;break;}
+    if(ok)m.add(o['n'+l]);}
+  return [...m].sort((a,b)=>lab(l,a).localeCompare(lab(l,b),'es',{numeric:true}));}
+/* drop selections that no longer fit under the upper levels */
+function pruneSel(sel){for(let l=1;l<=5;l++){if(!sel[l].size)continue;const ok=new Set(optionsFor(l,sel));const n=new Set([...sel[l]].filter(i=>ok.has(i)));if(n.size!==sel[l].size)sel[l]=n;}return sel;}
+
+/* theme tokens */
+let T={};
+function readTokens(){const cs=getComputedStyle(document.documentElement);const g=n=>cs.getPropertyValue('--'+n).trim();
+  T={ink:g('ink'),ink2:g('ink-2'),muted:g('muted'),line:g('line'),surface:g('surface'),surface2:g('surface-2'),accent:g('accent'),up:g('up'),down:g('down'),other:g('other'),
+     s:[1,2,3,4,5,6,7].map(i=>g('s'+i)),h:[1,2,3,4,5].map(i=>g('h'+i))};}
+readTokens();
+const textOn=hex=>{const h=hex.replace('#','');const [r,g,b]=[0,2,4].map(i=>parseInt(h.substr(i,2),16)/255).map(c=>c<=.03928?c/12.92:((c+.055)/1.055)**2.4);return (.2126*r+.7152*g+.0722*b)>0.4?'#2b2b2a':'#ffffff';};
+const colorOf=(l,i)=>{const s=COLOR_SLOT[l].get(i);return s===undefined?T.other:T.s[s];};
+
+/* charts */
+const charts={};
+function mk(id){const el=document.getElementById(id);const c=echarts.init(el,null,{renderer:'canvas'});charts[id]=c;new ResizeObserver(()=>c.resize()).observe(el);return c;}
+const cTrend=mk('cTrend'),cTree=mk('cTree'),cRank=mk('cRank'),cHeat=mk('cHeat'),cVar=mk('cVar'),cTer=mk('cTer');
+const TT=()=>({backgroundColor:T.surface,borderColor:T.line,borderWidth:1,textStyle:{color:T.ink,fontFamily:'Urbanist, system-ui, sans-serif',fontSize:12},extraCssText:'box-shadow:0 4px 16px rgb(0 0 0 / .14);border-radius:8px;max-width:360px;white-space:normal;'});
+const AX=()=>({axisLine:{lineStyle:{color:T.line}},axisTick:{show:false},axisLabel:{color:T.muted,fontFamily:'Urbanist, sans-serif',fontSize:11},splitLine:{lineStyle:{color:T.line,opacity:.7}}});
+const CATAX=w=>({color:T.ink2,fontSize:11.5,fontFamily:'Urbanist, sans-serif',width:w,overflow:'truncate'});
+const swatch=c=>`<span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${c};margin-right:6px"></span>`;
+const pathHtml=(l,i)=>{const p=pathOf(l,i);return p.length?`<div style="color:${T.muted};font-size:11px;margin-top:2px">${p.map(esc).join(' › ')}</div>`:'';};
+
+/* controls */
+const $=id=>document.getElementById(id);
+function fillSelects(){
+  const opts=MONTHS.map(m=>`<option value="${m}">${ymLabel(m)}</option>`).join('');$('from').innerHTML=opts;$('to').innerHTML=opts;
+  const pr=D.pr.map((p,i)=>({p,i})).filter(x=>x.p);$('proj').innerHTML='<option value="all">Todos</option>'+(D.pr.indexOf('')>=0?`<option value="${D.pr.indexOf('')}">Sin proyecto</option>`:'')+pr.map(x=>`<option value="${x.i}">${esc(x.p)}</option>`).join('');
+  const years=[...new Set(MONTHS.map(m=>m.slice(0,4)))];
+  const q=[{k:'all',t:'Todo'},{k:'12m',t:'Últimos 12 meses'}].concat(years.map(y=>({k:y,t:y})));
+  $('quick').innerHTML=q.map(x=>`<button data-v="${x.k}" aria-pressed="false">${x.t}</button>`).join('');
+  $('corte').textContent=fmtDate(MAXD);$('nmov').textContent=nf0.format(ROWS.length)+' ('+ymLabel(MONTHS[0])+' – '+ymLabel(MONTHS[MONTHS.length-1])+')';
+}
+function quickRange(k){const last=MONTHS[MONTHS.length-1];
+  if(k==='all')return[MONTHS[0],last];if(k==='12m')return[ymAdd(last,-11),last];
+  return[(k+'-01'<MONTHS[0]?MONTHS[0]:k+'-01'),(k+'-12'>last?last:k+'-12')];}
+let OPEN=null,OPEN_Q='';
+function renderLevelSelects(){
+  const prevList=document.querySelector('.ms-list'),scroll=prevList?prevList.scrollTop:0;
+  const ae=document.activeElement;const focusId=ae&&ae.closest&&ae.closest('#levels')?ae.id:null;
+  let html='';
+  for(const l of FLV){
+    if(l===0&&!MULTI_AREA)continue;
+    const nm=lvName(l);
+    const ids=optionsFor(l,S.sel),sel=S.sel[l];
+    const txt=!sel.size?`Todas (${ids.length})`:sel.size===1?lab(l,[...sel][0]):`${sel.size} de ${ids.length} seleccionadas`;
+    html+=`<div class="f ms" data-l="${l}"><span class="lbl">${nm}</span><button type="button" class="ms-btn${sel.size?' on':''}" id="msb${l}" aria-haspopup="true" aria-expanded="${OPEN===l}" title="${esc(sel.size?[...sel].map(i=>lab(l,i)).join(' · '):'Todas')}">${esc(txt)}</button>`;
+    if(OPEN===l){
+      html+=`<div class="ms-pop" role="dialog" aria-label="Filtrar ${nm}">
+        <input type="search" class="ms-q" id="msq${l}" placeholder="Buscar en ${nm}…" value="${esc(OPEN_Q)}" autocomplete="off">
+        <div class="ms-actions"><button type="button" class="linkbtn" data-act="all" id="msa${l}">Seleccionar visibles</button><span class="ms-count">${sel.size} de ${ids.length}</span><button type="button" class="linkbtn" data-act="none" id="msn${l}">Quitar selección</button></div>
+        <div class="ms-list">${ids.map(i=>`<label data-txt="${esc(lab(l,i).toLowerCase())}"><input type="checkbox" id="msc${l}_${i}" value="${i}"${sel.has(i)?' checked':''}><span>${esc(lab(l,i))}</span></label>`).join('')}</div></div>`;
+    }
+    html+='</div>';
+  }
+  $('levels').innerHTML=html;
+  if(OPEN!==null){applyMsFilter();const li=document.querySelector('.ms-list');if(li)li.scrollTop=scroll;}
+  if(focusId&&$(focusId))$(focusId).focus({preventScroll:true});
+}
+function applyMsFilter(){const q=OPEN_Q.toLowerCase().trim();document.querySelectorAll('.ms-list label').forEach(lb=>{lb.hidden=!!q&&!q.split(/\s+/).every(t=>lb.dataset.txt.includes(t));});}
+function syncControls(){
+  $('from').value=S.from;$('to').value=S.to;$('proj').value=S.proj;if($('q').value.toLowerCase().trim()!==S.q)$('q').value=S.q;
+  document.querySelectorAll('#quick button').forEach(b=>{const [f,t]=quickRange(b.dataset.v);b.setAttribute('aria-pressed',f===S.from&&t===S.to);});
+  [['libro',S.libro],['gran',S.gran],['rankN',S.rankN],['lvl',String(S.lvl)]].forEach(([id,v])=>document.querySelectorAll('#'+id+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v)));
+  renderLevelSelects();
+  const a=[];
+  FLV.forEach(l=>{const z=S.sel[l];if(z.size)a.push(['l'+l,lvName(l)+': '+(z.size<=2?[...z].map(i=>lab(l,i)).join(', '):z.size+' cuentas')]);});
+  if(S.ter!==null)a.push(['ter','Tercero: '+D.ter[S.ter]]);
+  if(S.q)a.push(['q','Búsqueda: “'+S.q+'”']);
+  $('active').innerHTML=a.map(([k,t])=>`<span class="pill"><span>${esc(t)}</span><button data-k="${k}" aria-label="Quitar filtro ${esc(t)}">×</button></span>`).join('');
+}
+function set(p){Object.assign(S,p);S.sel=pruneSel({...S.sel});if(!('page' in p))S.page=0;if(S.from>S.to){const t=S.from;S.from=S.to;S.to=t;}render();}
+
+/* aggregation helpers */
+const sumBy=(rows,key)=>{const m=new Map();for(const o of rows){const k=key(o);m.set(k,(m.get(k)||0)+o.v);}return m;};
+const total=rows=>rows.reduce((a,o)=>a+o.v,0);
+function periodKey(ym,g){const y=ym.slice(0,4),m=+ym.slice(5);return g==='M'?ym:g==='Q'?y+'-T'+Math.ceil(m/3):y;}
+function periodLabel(k,g){return g==='M'?ymLabel(k):g==='Q'?k.replace('-T',' T'):k;}
+function periodRange(k,g){if(g==='M')return[k,k];if(g==='Y')return quickRange(k);const y=k.slice(0,4),q=+k.slice(-1);
+  let f=y+'-'+String(q*3-2).padStart(2,'0'),t=y+'-'+String(q*3).padStart(2,'0');if(f<MONTHS[0])f=MONTHS[0];if(t>MONTHS[MONTHS.length-1])t=MONTHS[MONTHS.length-1];return[f,t];}
+
+function render(){
+  syncControls();
+  const L=S.lvl,key=o=>o['n'+L];
+  const base=ROWS.filter(o=>passBase(o,S));
+  const cur=base.filter(o=>inRange(o,S));
+  const pw=prevWindow(S);
+  const prev=pw?base.filter(o=>o.d>=pw.from&&o.d<=pw.to):null;
+  renderKPIs(cur,prev,L,key);
+  renderTrend(base,cur,L,key);
+  renderTree(cur);
+  renderRank(cur,L,key);
+  renderHeat(cur,L,key);
+  renderVar(cur,prev,pw,base,L,key);
+  renderTer(cur);
+  renderTable(cur);
+}
+
+function renderKPIs(cur,prev,L,key){
+  const tot=total(cur);
+  const months=MONTHS.filter(m=>m>=S.from&&m<=S.to);
+  const byM=sumBy(cur,o=>o.ym);
+  const full=months.filter(m=>m!==PARTIAL_MONTH);
+  const avg=full.length?full.reduce((a,m)=>a+(byM.get(m)||0),0)/full.length:tot/Math.max(1,months.length);
+  let peak=null;for(const m of months){const v=byM.get(m)||0;if(!peak||v>peak.v)peak={m,v};}
+  const curCmp=cur.filter(o=>o.d<=cutTo(S));
+  const pTot=prev?total(prev):null,cTot=total(curCmp);
+  let dHtml;
+  if(pTot===null||!pTot)dHtml=`<span class="delta na">sin base comparable</span>`;
+  else{const d=(cTot-pTot)/Math.abs(pTot);dHtml=`<span class="delta ${d>=0?'up':'down'}">${d>=0?'▲':'▼'} ${fPct(Math.abs(d))}</span>`;}
+  const byAcc=[...sumBy(cur,key)].sort((a,b)=>b[1]-a[1]);
+  const top=byAcc[0];
+  $('kpis').innerHTML=`
+   <div class="kpi"><span class="eyebrow">Gasto total del periodo</span><span class="v">${fM(tot)}</span><span class="s">${ymLabel(S.from)} – ${ymLabel(S.to)} · ${months.length} ${months.length===1?'mes':'meses'}</span></div>
+   <div class="kpi"><span class="eyebrow">Promedio mensual</span><span class="v">${fM(avg)}</span><span class="s">${PARTIAL_MONTH&&months.includes(PARTIAL_MONTH)?'Sin contar '+ymLabel(PARTIAL_MONTH)+' (mes en curso)':'Meses completos del periodo'}</span></div>
+   <div class="kpi"><span class="eyebrow">Frente al año anterior</span><span class="v">${pTot===null?'—':fM(cTot-pTot)}</span><span class="s">${dHtml} ${pTot!==null?'vs '+fM(pTot)+' mismo periodo':''}</span></div>
+   <div class="kpi"><span class="eyebrow">Mes de mayor gasto</span><span class="v">${peak?ymLabel(peak.m):'—'}</span><span class="s">${peak?fM(peak.v):''}</span></div>
+   <div class="kpi"><span class="eyebrow">Cuenta principal · Nivel ${L}</span><span class="v" style="font-family:var(--display);font-size:1.05rem;letter-spacing:0;line-height:1.3">${top?esc(lab(L,top[0])):'—'}</span><span class="s">${top&&tot?fPct(top[1]/tot)+' del total · '+fM(top[1]):''}</span></div>`;
+  const ins=[];
+  if(top&&tot>0&&byAcc.length>1)ins.push(`En Nivel ${L}, <b>${esc(lab(L,top[0]))}</b> representa el <b>${fPct(top[1]/tot,0)}</b> del gasto del periodo.`);
+  if(byAcc.length>=6&&tot>0){const t5=byAcc.slice(0,5).reduce((a,x)=>a+x[1],0);ins.push(`Las <b>5 cuentas principales</b> de Nivel ${L} (de ${byAcc.length}) concentran el <b>${fPct(t5/tot,0)}</b> del gasto.`);}
+  if(prev&&prev.length){const p=sumBy(prev,key),c=sumBy(curCmp,key);
+    let best=null,worst=null;for(const k of new Set([...p.keys(),...c.keys()])){const d=(c.get(k)||0)-(p.get(k)||0);if(!best||d>best.d)best={k,d};if(!worst||d<worst.d)worst={k,d};}
+    if(best&&best.d>0)ins.push(`Lo que más creció frente al año anterior: <b>${esc(lab(L,best.k))}</b> (+${fM(best.d)}).`);
+    if(worst&&worst.d<0)ins.push(`Lo que más bajó: <b>${esc(lab(L,worst.k))}</b> (${fM(worst.d)}).`);}
+  if(peak&&peak.v>0&&months.length>1){const pm=[...sumBy(cur.filter(o=>o.ym===peak.m),key)].sort((a,b)=>b[1]-a[1])[0];
+    if(pm)ins.push(`El pico de <b>${ymLabel(peak.m)}</b> (${fM(peak.v)}) lo explica sobre todo <b>${esc(lab(L,pm[0]))}</b> (${fM(pm[1])}).`);}
+  if(!cur.length)ins.push('No hay movimientos con estos filtros. Prueba ampliar el periodo o limpiar los filtros.');
+  $('insights').innerHTML=ins.map(t=>`<p>${t}</p>`).join('');
+  $('insights').hidden=!ins.length;
+}
+
+function renderTrend(base,cur,L,key){
+  const g=S.gran;const months=MONTHS.filter(m=>m>=S.from&&m<=S.to);
+  const keys=[...new Set(months.map(m=>periodKey(m,g)))];
+  const tot=total(cur);
+  const byAcc=sumBy(cur,key);
+  // colored accounts = those with a color slot at this level, in slot order; everything else = "Demás cuentas"
+  const colored=[...COLOR_SLOT[L].entries()].sort((a,b)=>a[1]-b[1]).map(([k])=>k).filter(k=>byAcc.has(k));
+  const others=[...byAcc.keys()].filter(k=>!COLOR_SLOT[L].has(k));
+  const series=colored.map(k=>{const by=sumBy(cur.filter(o=>key(o)===k),o=>periodKey(o.ym,g));
+    return {name:lab(L,k),acc:k,type:'bar',stack:'g',barMaxWidth:28,data:keys.map(p=>+(by.get(p)||0).toFixed(0)),itemStyle:{color:colorOf(L,k),borderColor:T.surface,borderWidth:keys.length>40?0.5:1},emphasis:{focus:'series'}};});
+  if(others.length){const set_=new Set(others);const by=sumBy(cur.filter(o=>set_.has(key(o))),o=>periodKey(o.ym,g));
+    series.push({name:`Demás cuentas de Nivel ${L} (${others.length})`,type:'bar',stack:'g',barMaxWidth:28,data:keys.map(p=>+(by.get(p)||0).toFixed(0)),itemStyle:{color:T.other,borderColor:T.surface,borderWidth:keys.length>40?0.5:1},emphasis:{focus:'series'}});}
+  if(series.length)series[series.length-1].itemStyle.borderRadius=[3,3,0,0];
+  // legend chips
+  $('legend').innerHTML=series.map(s=>{const v=s.acc!==undefined?byAcc.get(s.acc):others.reduce((a,k)=>a+byAcc.get(k),0);
+    return `<button class="chip" ${s.acc!==undefined?`data-acc="${s.acc}"`:'disabled style="cursor:default"'} aria-pressed="true" title="${esc(s.name)}${s.acc!==undefined?' · clic para filtrar':''}"><i style="background:${s.itemStyle.color}"></i>${esc(short(s.name,40))}<span class="pct">${tot?fPct(v/tot,0):''}</span></button>`;}).join('');
+  if(g==='M'){const all=sumBy(base,o=>o.ym);const roll=keys.map(k=>{const i=MONTHS.indexOf(k);if(i<11)return null;let s=0;for(let j=i-11;j<=i;j++)s+=all.get(MONTHS[j])||0;return +(s/12).toFixed(0);});
+    series.push({name:'Promedio móvil 12 meses',type:'line',data:roll,symbol:'none',lineStyle:{color:T.ink,width:2,type:[6,4]},itemStyle:{color:T.ink},z:10});}
+  $('trendTitle').textContent='Evolución del gasto por Nivel '+L;
+  $('trendSub').textContent=(g==='M'?'Gasto mensual por cuenta, con el promedio móvil de 12 meses (línea punteada). ':'Gasto por '+(g==='Q'?'trimestre':'año')+' y cuenta. ')+'Clic en una barra para ver solo ese periodo; clic en una cuenta de la leyenda para filtrarla.'+(PARTIAL_MONTH&&S.to>=PARTIAL_MONTH?` ${ymLabel(PARTIAL_MONTH)} está incompleto (corte ${fmtDate(MAXD)}).`:'');
+  cTrend.setOption({animationDuration:400,grid:{left:8,right:16,top:16,bottom:keys.length>24?56:28,containLabel:true},
+    tooltip:{...TT(),trigger:'axis',axisPointer:{type:'shadow',shadowStyle:{color:T.line,opacity:.35}},formatter:ps=>{const k=keys[ps[0].dataIndex];let t=0;const lines=ps.filter(p=>p.seriesType==='bar'&&p.value).map(p=>{t+=p.value;return `<div style="display:flex;justify-content:space-between;gap:16px"><span>${swatch(p.color)}${esc(short(p.seriesName,40))}</span><span style="font-family:Urbanist,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap">${fM(p.value)}</span></div>`;}).reverse();
+      const r=ps.find(p=>p.seriesType==='line'&&p.value!=null);
+      return `<div style="font-weight:600;margin-bottom:4px">${periodLabel(k,g)}${k===PARTIAL_MONTH?' <span style="color:'+T.muted+';font-weight:400">(parcial)</span>':''}</div>${lines.join('')}<div style="display:flex;justify-content:space-between;gap:16px;border-top:1px solid ${T.line};margin-top:4px;padding-top:4px;font-weight:600"><span>Total</span><span style="font-family:Urbanist,sans-serif;font-variant-numeric:tabular-nums">${fM(t)}</span></div>${r?`<div style="color:${T.muted};margin-top:2px">Prom. móvil 12m: ${fM(r.value)}</div>`:''}`;}},
+    xAxis:{type:'category',data:keys.map(k=>periodLabel(k,g)),...AX(),axisLabel:{...AX().axisLabel,hideOverlap:true}},
+    yAxis:{type:'value',...AX(),axisLabel:{...AX().axisLabel,formatter:v=>(v<0?'−$':'$')+nf0.format(Math.abs(v)/1e6)+' M'}},
+    dataZoom:keys.length>24?[{type:'inside'},{type:'slider',height:18,bottom:6,borderColor:T.line,fillerColor:T.line+'66',handleStyle:{color:T.surface,borderColor:T.muted},textStyle:{color:T.muted},dataBackground:{lineStyle:{color:T.muted},areaStyle:{color:T.line}},selectedDataBackground:{lineStyle:{color:T.accent},areaStyle:{color:T.accent,opacity:.2}}}]:[],
+    series},true);
+  cTrend.off('click');cTrend.on('click',p=>{const k=keys[p.dataIndex];const [f,t]=periodRange(k,g);set({from:f,to:t});});
+}
+
+function renderTree(cur){
+  // N1 → N5 hierarchy with positive net values; colored by the account at the chosen level
+  const L=S.lvl;const root=new Map();let neg=0;
+  const leaf=sumBy(cur,o=>o.n5);
+  const tot=[...leaf.values()].filter(v=>v>0).reduce((a,v)=>a+v,0);
+  for(const [n5,v] of leaf){if(v<=0){neg+=v;continue;}
+    const chain=[...PARENT[5].get(n5),n5];let lvlMap=root,node;
+    chain.forEach((id,i)=>{const l=i+1;if(!lvlMap.has(id))lvlMap.set(id,{name:lab(l,id),l,id,kids:new Map(),value:0});node=lvlMap.get(id);node.value+=v;lvlMap=node.kids;});}
+  const conv=(n,anc)=>{const a={...anc,[n.l]:n.id};const c=n.l>=L?colorOf(L,a[L]):colorOf(n.l,n.id);
+    const tc=textOn(c);const o={name:n.name,value:+n.value.toFixed(0),l:n.l,id:n.id,itemStyle:{color:c},label:{color:tc,textShadowBlur:tc==='#ffffff'?3:0}};
+    if(n.kids.size)o.children=[...n.kids.values()].map(k=>conv(k,a));return o;};
+  const data=[...root.values()].map(n=>conv(n,{}));
+  $('treeNote').textContent=(neg<0?`No se muestran cuentas de Nivel 5 con saldo neto negativo en el periodo (${fM(neg)}: reversiones y ajustes). `:'')+`Al entrar hasta el Nivel ${L}, el color es el de la cuenta de Nivel ${L}; en gris, las cuentas fuera de las 7 principales de su nivel.`;
+  cTree.setOption({animationDuration:400,tooltip:{...TT(),formatter:p=>{const d=p.data;if(!d||d.l===undefined)return '';
+      return `<span style="color:${T.muted};font-size:11px">Nivel ${d.l}</span><br><b>${esc(d.name)}</b>${pathHtml(d.l,d.id)}<div style="margin-top:4px">${fM(d.value)} · ${fPct(d.value/tot)} del total</div>`;}},
+    series:[{type:'treemap',name:'Todas las cuentas',data,roam:false,nodeClick:'zoomToNode',leafDepth:2,width:'100%',height:'88%',top:0,left:0,
+      breadcrumb:{show:true,bottom:0,height:24,itemStyle:{color:T.surface2,borderColor:T.line,textStyle:{color:T.ink2,fontFamily:'Urbanist, sans-serif'}},emphasis:{itemStyle:{color:T.line,textStyle:{color:T.ink}}}},
+      upperLabel:{show:true,height:22,color:T.ink2,fontWeight:700,fontSize:12,fontFamily:'Urbanist, sans-serif',overflow:'truncate',ellipsis:'…',formatter:p=>p.name+'  ·  '+fM(p.value)},
+      label:{show:true,color:'#fff',fontSize:11,fontFamily:'Urbanist, sans-serif',textShadowColor:'rgba(0,0,0,.45)',textShadowBlur:3,overflow:'truncate',ellipsis:'…',formatter:p=>p.value/tot<0.008?'':`${p.name}\n${fM(p.value)}`},
+      levels:[{itemStyle:{borderColor:T.surface,borderWidth:3,gapWidth:3}},{itemStyle:{borderColor:T.surface,borderWidth:2,gapWidth:2}},{itemStyle:{borderColor:T.surface,borderWidth:1,gapWidth:1}},{itemStyle:{borderColor:T.surface,borderWidth:1,gapWidth:1}},{itemStyle:{borderColor:T.surface,gapWidth:1}}],
+      itemStyle:{borderRadius:3}}]},true);
+}
+
+function renderRank(cur,L,key){
+  const tot=total(cur);
+  let arr=[...sumBy(cur,key)].map(([k,v])=>({k,v})).sort((a,b)=>b.v-a.v);
+  const n=arr.length;
+  if(S.rankN!=='all')arr=arr.slice(0,15);
+  arr.reverse();
+  $('rankTitle').textContent='Ranking de cuentas · Nivel '+L;
+  $('rankSub').textContent=`${n} cuenta${n===1?'':'s'} de Nivel ${L} con movimiento en el periodo.${L<5?' Clic en una barra para bajar al Nivel '+(L+1)+'.':' Clic para filtrar.'}`;
+  const h=Math.max(200,arr.length*26+30);$('cRank').style.height=h+'px';cRank.resize();
+  cRank.setOption({animationDuration:400,grid:{left:8,right:70,top:6,bottom:6,containLabel:true},
+    tooltip:{...TT(),trigger:'item',formatter:p=>{const a=arr[p.dataIndex];return `<b>${esc(lab(L,a.k))}</b>${pathHtml(L,a.k)}<div style="margin-top:4px">${fM(a.v)}${tot?' · '+fPct(a.v/tot):''}</div>`;}},
+    xAxis:{type:'value',show:false},
+    yAxis:{type:'category',data:arr.map(a=>short(lab(L,a.k))),...AX(),axisLabel:CATAX(230)},
+    series:[{type:'bar',barMaxWidth:16,data:arr.map(a=>({value:+a.v.toFixed(0),itemStyle:{color:colorOf(L,a.k),opacity:!S.sel[L].size||S.sel[L].has(a.k)?1:.35,borderRadius:a.v>=0?[0,4,4,0]:[4,0,0,4]}})),
+      label:{show:true,position:'right',color:T.ink2,fontFamily:'Urbanist, sans-serif',fontSize:11,formatter:p=>fM(p.value)}}]},true);
+  cRank.off('click');cRank.on('click',p=>{const a=arr[p.dataIndex];selAccount(L,a.k,true);});
+}
+
+function renderHeat(cur,L,key){
+  const years=[...new Set(MONTHS.filter(m=>m>=S.from&&m<=S.to).map(m=>m.slice(0,4)))];
+  const top=[...sumBy(cur,key)].sort((a,b)=>b[1]-a[1]).slice(0,15).map(x=>x[0]);
+  const by=sumBy(cur.filter(o=>top.includes(key(o))),o=>key(o)+'|'+o.y);
+  const cats=[...top].reverse();
+  const vals=[];let max=0;cats.forEach((k,yi)=>years.forEach((y,xi)=>{const v=by.get(k+'|'+y)||0;max=Math.max(max,v);vals.push([xi,yi,+v.toFixed(0)]);}));
+  const firstY=MONTHS[0].slice(0,4),lastY=MAXD.slice(0,4);
+  const yLab=y=>y===firstY&&MONTHS[0].slice(5)!=='01'?y+'*':y===lastY&&PARTIAL_MONTH?y+'*':y;
+  $('heatTitle').textContent='Tendencia por cuenta y año · Nivel '+L;
+  $('heatSub').textContent=`Las ${cats.length} cuentas de Nivel ${L} con mayor gasto en el periodo, en millones por año. Más oscuro = más gasto. `+((years.includes(firstY)||years.includes(lastY))?`* Año incompleto (${firstY} inicia en ${MES[+MONTHS[0].slice(5)-1]}; ${lastY} llega hasta el ${fmtDate(MAXD)}).`:'');
+  $('cHeat').style.height=Math.max(200,cats.length*30+60)+'px';cHeat.resize();
+  cHeat.setOption({animationDuration:300,grid:{left:8,right:16,top:28,bottom:8,containLabel:true},
+    tooltip:{...TT(),formatter:p=>{const [xi,yi,v]=p.value;const k=cats[yi];const pv=xi>0?(by.get(k+'|'+years[xi-1])||0):null;
+      return `<b>${esc(lab(L,k))}</b> · ${years[xi]}${pathHtml(L,k)}<div style="margin-top:4px">${fM(v)}</div>${pv?`<span style="color:${T.muted}">vs ${years[xi-1]}: ${v>=pv?'+':''}${fPct((v-pv)/Math.abs(pv),0)}</span>`:''}`;}},
+    xAxis:{type:'category',position:'top',data:years.map(yLab),...AX(),axisLabel:{...AX().axisLabel,color:T.ink2,fontSize:12}},
+    yAxis:{type:'category',data:cats.map(k=>short(lab(L,k),38)),...AX(),axisLabel:CATAX(260)},
+    visualMap:{show:false,min:0,max:max||1,inRange:{color:T.h}},
+    series:[{type:'heatmap',data:vals.map(v=>({value:v,label:{color:v[2]>max*0.45?T.h[0]:T.ink}})),itemStyle:{borderColor:T.surface,borderWidth:2,borderRadius:4},
+      label:{show:true,fontFamily:'Urbanist, sans-serif',fontSize:11,formatter:p=>p.value[2]?nf1.format(p.value[2]/1e6):'–'},emphasis:{itemStyle:{borderColor:T.ink,borderWidth:1.5}}}]},true);
+  cHeat.off('click');cHeat.on('click',p=>{const [xi,yi]=p.value;const [f,t]=quickRange(years[xi]);S.from=f;S.to=t;selAccount(L,cats[yi],true);});
+}
+
+function renderVar(cur,prev,pw,base,L,key){
+  let fb='';let to=cutTo(S);
+  if(!prev){const f=ymAdd(S.to,-11);const s2={...S,from:f<S.from?S.from:f};pw=prevWindow(s2);
+    if(!pw){$('varSub').textContent='Elige un periodo que tenga datos un año antes para comparar (los datos inician en '+ymLabel(MONTHS[0])+').';cVar.clear();return;}
+    cur=base.filter(o=>inRange(o,s2));prev=base.filter(o=>o.d>=pw.from&&o.d<=pw.to);fb=s2.from;}
+  const fromYm=fb||S.from;
+  const c=sumBy(cur.filter(o=>o.d<=to),key),p=sumBy(prev,key);
+  const arr=[...new Set([...c.keys(),...p.keys()])].map(k=>({k,c:c.get(k)||0,p:p.get(k)||0})).map(x=>({...x,d:x.c-x.p})).filter(x=>Math.abs(x.d)>=1);
+  const ups=arr.filter(x=>x.d>0).sort((a,b)=>b.d-a.d).slice(0,8),downs=arr.filter(x=>x.d<0).sort((a,b)=>a.d-b.d).slice(0,8);
+  const list=[...downs,...ups].sort((a,b)=>a.d-b.d);
+  $('varSub').textContent=(fb?'Últimos 12 meses del periodo. ':'')+`Cambio en pesos por cuenta de Nivel ${L}: ${fmtDate(fromYm+'-01')} – ${fmtDate(to)} frente a ${fmtDate(pw.from)} – ${fmtDate(pw.to)}. Rojo = el gasto subió; azul = bajó.`;
+  if(!list.length){cVar.clear();return;}
+  $('cVar').style.height=Math.max(160,list.length*26+40)+'px';cVar.resize();
+  cVar.setOption({animationDuration:400,grid:{left:8,right:16,top:6,bottom:6,containLabel:true},
+    tooltip:{...TT(),formatter:pp=>{const x=list[pp.dataIndex];return `<b>${esc(lab(L,x.k))}</b>${pathHtml(L,x.k)}<div style="margin-top:4px">Periodo actual: ${fM(x.c)}<br>Año anterior: ${fM(x.p)}<br><b style="color:${x.d>0?T.up:T.down}">${x.d>0?'+':''}${fM(x.d)}${x.p>0?' ('+(x.d>0?'+':'')+fPct(x.d/x.p,0)+')':''}</b></div>`;}},
+    xAxis:{type:'value',...AX(),axisLabel:{...AX().axisLabel,formatter:v=>nf0.format(v/1e6)+' M'}},
+    yAxis:{type:'category',data:list.map(x=>short(lab(L,x.k))),...AX(),axisLine:{show:false},axisLabel:CATAX(230)},
+    series:[{type:'bar',barMaxWidth:14,data:list.map(x=>({value:+x.d.toFixed(0),itemStyle:{color:x.d>0?T.up:T.down,borderRadius:x.d>0?[0,4,4,0]:[4,0,0,4]}})),label:{show:false}}]},true);
+  cVar.off('click');cVar.on('click',pp=>{const x=list[pp.dataIndex];selAccount(L,x.k,true);});
+}
+
+function renderTer(cur){
+  const tot=total(cur);
+  const arr=[...sumBy(cur.filter(o=>D.ter[o.ter]&&!/NOMINA/i.test(D.ter[o.ter])),o=>o.ter)].filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,12).reverse();
+  $('cTer').style.height=Math.max(200,arr.length*30+30)+'px';cTer.resize();
+  cTer.setOption({animationDuration:400,grid:{left:8,right:70,top:6,bottom:6,containLabel:true},
+    tooltip:{...TT(),formatter:p=>{const [k,v]=arr[p.dataIndex];const n=cur.filter(o=>o.ter===k).length;return `<b>${esc(D.ter[k])}</b><br>${fM(v)} · ${n} movimiento${n===1?'':'s'}${tot?'<br><span style="color:'+T.muted+'">'+fPct(v/tot)+' del total</span>':''}`;}},
+    xAxis:{type:'value',show:false},
+    yAxis:{type:'category',data:arr.map(x=>D.ter[x[0]]),...AX(),axisLabel:CATAX(200)},
+    series:[{type:'bar',barMaxWidth:16,data:arr.map(x=>({value:+x[1].toFixed(0),itemStyle:{color:T.s[0],opacity:S.ter===null||S.ter===x[0]?1:.35,borderRadius:[0,4,4,0]}})),
+      label:{show:true,position:'right',color:T.ink2,fontFamily:'Urbanist, sans-serif',fontSize:11,formatter:p=>fM(p.value)}}]},true);
+  if(!arr.length)cTer.setOption({title:{text:'Sin terceros en esta selección',left:'center',top:'middle',textStyle:{color:T.muted,fontSize:13,fontWeight:400}}});
+  cTer.off('click');cTer.on('click',p=>{const k=arr[p.dataIndex][0];set({ter:S.ter===k?null:k});});
+}
+
+const PAGE=50;
+function renderTable(cur){
+  const {k,dir}=S.sort;
+  const val=o=>k==='n5'?lab(5,o.n5):k==='ter'?D.ter[o.ter]:k==='pr'?D.pr[o.pr]:k==='td'?D.td[o.td]:o[k];
+  const rows=[...cur].sort((a,b)=>{const x=val(a),y=val(b);return (x<y?-1:x>y?1:0)*dir;});
+  const pages=Math.max(1,Math.ceil(rows.length/PAGE));if(S.page>=pages)S.page=pages-1;
+  const slice=rows.slice(S.page*PAGE,(S.page+1)*PAGE);
+  document.querySelectorAll('#tbl th').forEach(th=>th.setAttribute('aria-sort',th.dataset.k===k?(dir>0?'ascending':'descending'):'none'));
+  document.querySelector('#tbl tbody').innerHTML=slice.map(o=>`<tr>
+    <td class="num mono">${o.d}</td>
+    <td style="min-width:260px"><span class="dot" style="background:${colorOf(S.lvl,o['n'+S.lvl])}"></span>${esc(lab(5,o.n5))}<div class="path">${(MULTI_AREA?[0,1,2,3,4]:[1,2,3,4]).map(l=>esc(lab(l,o['n'+l]))).join(' › ')}</div></td>
+    <td>${esc(D.ter[o.ter]||'—')}</td><td class="mono">${esc(D.pr[o.pr]||'—')}</td>
+    <td class="cm">${esc(o.c)}</td><td><span class="hint">${esc((D.td[o.td]||'').toLowerCase())}</span><div class="mono hint">${o.num} · ${esc(o.avl)}</div></td>
+    <td class="r num mono ${o.v<0?'neg':''}">${fCOP(o.v)}</td></tr>`).join('')||`<tr><td colspan="7" class="hint" style="padding:20px">No hay movimientos con estos filtros.</td></tr>`;
+  $('tblSub').textContent=`${nf0.format(rows.length)} movimientos · total ${fCOP(total(cur))}. Clic en los encabezados para ordenar.`;
+  $('pgInfo').textContent=rows.length?`Mostrando ${S.page*PAGE+1}–${Math.min(rows.length,(S.page+1)*PAGE)} de ${nf0.format(rows.length)}`:'';
+  $('pgPrev').disabled=S.page===0;$('pgNext').disabled=S.page>=pages-1;
+}
+
+/* events */
+fillSelects();
+$('from').addEventListener('change',e=>set({from:e.target.value}));
+$('to').addEventListener('change',e=>set({to:e.target.value}));
+$('proj').addEventListener('change',e=>set({proj:e.target.value}));
+let qt;$('q').addEventListener('input',e=>{clearTimeout(qt);qt=setTimeout(()=>set({q:e.target.value.toLowerCase().trim()}),200);});
+$('quick').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const [f,t]=quickRange(b.dataset.v);set({from:f,to:t});});
+['libro','gran','rankN'].forEach(id=>$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(b)set({[id]:b.dataset.v});}));
+$('lvl').addEventListener('click',e=>{const b=e.target.closest('button');if(b)set({lvl:+b.dataset.v});});
+$('levels').addEventListener('click',e=>{
+  const b=e.target.closest('.ms-btn');
+  if(b){const l=+b.closest('.ms').dataset.l;OPEN=OPEN===l?null:l;OPEN_Q='';renderLevelSelects();if(OPEN!==null)$('msq'+l).focus();return;}
+  const act=e.target.closest('[data-act]');
+  if(act){const l=OPEN;const sel={...S.sel};
+    if(act.dataset.act==='none')sel[l]=new Set();
+    else{const n=new Set(sel[l]);document.querySelectorAll('.ms-list label').forEach(lb=>{if(!lb.hidden)n.add(+lb.querySelector('input').value);});sel[l]=n;}
+    set({sel});}
+});
+$('levels').addEventListener('change',e=>{const c=e.target.closest('.ms-list input[type=checkbox]');if(!c)return;const l=OPEN;const sel={...S.sel};const n=new Set(sel[l]);
+  c.checked?n.add(+c.value):n.delete(+c.value);sel[l]=n;set({sel});});
+$('levels').addEventListener('input',e=>{if(e.target.classList.contains('ms-q')){OPEN_Q=e.target.value;applyMsFilter();}});
+document.addEventListener('click',e=>{if(OPEN!==null&&!e.target.closest('.ms')){OPEN=null;renderLevelSelects();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&OPEN!==null){const l=OPEN;OPEN=null;renderLevelSelects();$('msb'+l).focus();}});
+$('reset').addEventListener('click',()=>{S=DEFAULT();$('q').value='';render();});
+$('active').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;
+  if(k[0]==='l'&&k.length===2)clearLevel(+k[1]);else if(k==='ter')set({ter:null});else if(k==='q'){$('q').value='';set({q:''});}});
+$('legend').addEventListener('click',e=>{const b=e.target.closest('.chip[data-acc]');if(b)selAccount(S.lvl,+b.dataset.acc,true);});
+document.querySelectorAll('#tbl th').forEach(th=>{const go=()=>{const k=th.dataset.k;set({sort:{k,dir:S.sort.k===k?-S.sort.dir:(k==='v'||k==='d'?-1:1)}});};
+  th.addEventListener('click',go);th.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});
+$('pgPrev').addEventListener('click',()=>set({page:S.page-1}));
+$('pgNext').addEventListener('click',()=>set({page:S.page+1}));
+const retheme=()=>{readTokens();render();};
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',retheme);
+new MutationObserver(retheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>render());
+render();
+}
+
+return { startDashboard };
+})();
+
+/* ===== main.js ===== */
+__m['main'] = async (session) => {
+/* Página principal: acceso → áreas del usuario → tablero. */
+const { APP } = __m['config'];
+const { requireSession, renderUserbar } = __m['auth-ui'];
+const { listAreas, loadAreaData } = __m['store'];
+const { startDashboard } = __m['dashboard'];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const titleCase = s => String(s).toLowerCase().replace(/(^|\s)\S/g, m => m.toUpperCase());
+
+function status(title, text = '', withLogout = false) {
+  const el = $('loading');
+  el.hidden = false;
+  el.innerHTML = `<div class="auth-card"><div class="auth-brand"><b>${esc(APP.company)}</b><span>${esc(APP.tagline)}</span></div>
+    <div class="auth-body"><h2>${esc(title)}</h2><p class="auth-sub">${text}</p><div class="auth-actions" id="stActions"></div></div></div>`;
+  return el;
+}
+
+
+const { profile } = session;
+
+status('Cargando tu tablero', 'Buscando las áreas que tienes asignadas…');
+let ids;
+try {
+  ids = profile.role === 'admin' ? (await listAreas()).map(a => a.id) : (profile.areas || []).map(String);
+} catch (e) {
+  status('No se pudieron leer tus áreas', esc(e.message));
+  throw e;
+}
+
+if (!ids.length) {
+  const el = status('Aún no tienes áreas asignadas',
+    profile.role === 'admin'
+      ? 'Todavía no hay datos cargados. Ve al panel de administración para subir el reporte contable.'
+      : 'Pide al administrador que te asigne una o más áreas.');
+  renderUserbar(el.querySelector('#stActions'), session, profile.role === 'admin' ? [{ href: '#admin', text: 'Ir a administración' }] : []);
+} else {
+  let data;
+  try {
+    data = await loadAreaData(ids, msg => { $('loading').querySelector('.auth-sub').textContent = msg; });
+  } catch (e) {
+    status('No se pudieron cargar los datos', esc(e.code === 'permission-denied' ? 'No tienes permiso para una de las áreas asignadas. Avísale al administrador.' : e.message));
+    throw e;
+  }
+  if (!data.raw.rows.length) {
+    const el = status('Sin movimientos', 'Tus áreas todavía no tienen datos cargados.');
+    renderUserbar(el.querySelector('#stActions'), session);
+  } else {
+    const areas = data.areas;
+    const one = areas.length === 1 ? areas[0] : null;
+    const title = one
+      ? `${APP.titlePrefix} ${APP.areaAliases[one.id] || titleCase(one.name)}`
+      : `${APP.titlePrefix} por área`;
+    $('title').textContent = title;
+    document.title = title;
+    $('eyebrow').textContent = 'Reporte contable · ' + (areas.length <= 3 ? areas.map(a => titleCase(a.name)).join(' · ') : `${areas.length} áreas`);
+    renderUserbar($('userbar'), session, profile.role === 'admin' ? [{ href: '#admin', text: 'Administración' }] : []);
+    $('loading').hidden = true;
+    $('app').hidden = false;
+    startDashboard(data.raw);
+  }
+}
+
+};
+
+/* ===== admin.js ===== */
+__m['admin'] = async (session) => {
+/* Panel de administración: cargar el reporte contable, gestionar usuarios y áreas. */
+const { requireSession, renderUserbar } = __m['auth-ui'];
+const { emailKey, createAccount } = __m['firebase'];
+const { readWorkbook, buildAreas, COLS, REQUIRED } = __m['prep'];
+const { listAreas, areaLabel, publishAreas, deleteArea, listUsers, saveUser, deleteUser } = __m['store'];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nf0 = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
+const fCOP = v => (v < 0 ? '−' : '') + '$' + nf0.format(Math.abs(Math.round(v)));
+const fWhen = ts => (ts?.toDate ? ts.toDate().toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' }) : '—');
+
+
+const me = emailKey(session.user.email);
+renderUserbar($('adminUserbar'), session, [{ href: '#', text: 'Ver tablero' }]);
+$('adminApp').hidden = false;
+
+let AREAS = [], USERS = [];
+
+/* ---------- pestañas ---------- */
+const TABS = ['datos', 'usuarios', 'areas'];
+function showTab(t) {
+  TABS.forEach(x => { $('tab-' + x).hidden = x !== t; });
+  document.querySelectorAll('#tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === t));
+  try { localStorage.setItem('adminTab', t); } catch {}
+}
+$('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) showTab(b.dataset.t); });
+let startTab = 'datos';
+try { startTab = localStorage.getItem('adminTab') || 'datos'; } catch {}
+showTab(TABS.includes(startTab) ? startTab : 'datos');
+
+/* Botón de dos pasos para acciones irreversibles (el visor no muestra confirm()). */
+function twoStep(btn, run) {
+  if (btn.dataset.armed) {
+    btn.disabled = true;
+    run().finally(() => { btn.disabled = false; delete btn.dataset.armed; });
+    return;
+  }
+  btn.dataset.armed = '1';
+  const old = btn.textContent;
+  btn.textContent = '¿Confirmar?';
+  btn.classList.add('danger');
+  setTimeout(() => { if (btn.isConnected && btn.dataset.armed) { delete btn.dataset.armed; btn.textContent = old; btn.classList.remove('danger'); } }, 4000);
+}
+
+/* ---------- carga de datos ---------- */
+let PREPARED = null;
+const drop = $('drop'), fileIn = $('file');
+const log = (t, kind = '') => { const li = document.createElement('li'); li.textContent = t; if (kind) li.className = kind; $('log').append(li); li.scrollIntoView({ block: 'nearest' }); };
+
+$('reqCols').innerHTML = REQUIRED.map(k => `<code>${COLS[k]}</code>`).join(' ');
+drop.addEventListener('click', () => fileIn.click());
+drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileIn.click(); } });
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileIn.addEventListener('change', () => { if (fileIn.files[0]) handleFile(fileIn.files[0]); fileIn.value = ''; });
+
+async function handleFile(file) {
+  PREPARED = null;
+  $('publish').disabled = true;
+  $('preview').innerHTML = '';
+  $('log').innerHTML = '';
+  $('fileInfo').textContent = `Leyendo ${file.name} (${(file.size / 1048576).toFixed(1)} MB)…`;
+  try {
+    const { sheet, rows, parseDate } = await readWorkbook(file);
+    const res = buildAreas(rows, parseDate);
+    if (res.missing.length) {
+      $('fileInfo').innerHTML = `<span class="err">Al archivo le faltan columnas: ${res.missing.map(c => `<code>${esc(c)}</code>`).join(', ')}. Revisa que la primera hoja tenga los encabezados del reporte contable.</span>`;
+      return;
+    }
+    PREPARED = res;
+    const sk = res.skipped, nSk = sk.sinArea + sk.sinFecha + sk.sinValor;
+    $('fileInfo').innerHTML = `<b>${esc(file.name)}</b> · hoja “${esc(sheet)}” · ${nf0.format(rows.length)} filas leídas · ${res.areas.length} área(s)` +
+      (nSk ? ` · <span class="warn">${nf0.format(nSk)} filas omitidas (${[sk.sinArea && sk.sinArea + ' sin centro de costo', sk.sinFecha && sk.sinFecha + ' sin fecha válida', sk.sinValor && sk.sinValor + ' sin valor'].filter(Boolean).join(', ')})</span>` : '');
+    const known = new Set(AREAS.map(a => a.id));
+    const incoming = new Set(res.areas.map(a => a.id));
+    const gone = AREAS.filter(a => !incoming.has(a.id));
+    $('preview').innerHTML = `<div class="tbl-wrap"><table><thead><tr><th>Área (centro de costo)</th><th class="r">Movimientos</th><th class="r">Total</th><th>Desde</th><th>Hasta</th><th>Estado</th></tr></thead><tbody>
+      ${res.areas.map(a => `<tr><td>${esc(areaLabel(a))}</td><td class="r num">${nf0.format(a.rows)}</td><td class="r num">${fCOP(a.total)}</td><td class="num">${a.minDate}</td><td class="num">${a.maxDate}</td><td>${known.has(a.id) ? '<span class="tag">Reemplaza</span>' : '<span class="tag new">Nueva</span>'}</td></tr>`).join('')}
+      </tbody></table></div>
+      ${gone.length ? `<label class="check"><input type="checkbox" id="purge"> Eliminar del sistema las ${gone.length} área(s) que ya no vienen en este archivo: ${gone.map(a => esc(areaLabel(a))).join(', ')}</label>` : ''}`;
+    $('publish').disabled = false;
+  } catch (e) {
+    $('fileInfo').innerHTML = `<span class="err">No se pudo leer el archivo: ${esc(e.message)}</span>`;
+  }
+}
+
+$('publish').addEventListener('click', async () => {
+  if (!PREPARED) return;
+  $('publish').disabled = true;
+  $('log').innerHTML = '';
+  try {
+    await publishAreas(PREPARED.areas, { by: me, onLog: log });
+    if ($('purge')?.checked) {
+      const incoming = new Set(PREPARED.areas.map(a => a.id));
+      for (const a of AREAS.filter(x => !incoming.has(x.id))) { await deleteArea(a.id); log(`${areaLabel(a)}: eliminada.`, 'ok'); }
+    }
+    log('Datos publicados. Los usuarios verán la información nueva al recargar el tablero.', 'ok');
+    PREPARED = null;
+    await refreshAreas();
+  } catch (e) {
+    log(`Error: ${e.code === 'permission-denied' ? 'sin permiso para escribir. Revisa que las reglas de Firestore estén publicadas y que tu usuario sea admin.' : e.message}`, 'err');
+    $('publish').disabled = false;
+  }
+});
+
+/* ---------- áreas ---------- */
+async function refreshAreas() {
+  AREAS = await listAreas();
+  const usersBy = id => USERS.filter(u => u.role !== 'admin' && (u.areas || []).includes(id)).length;
+  $('areasBody').innerHTML = AREAS.map(a => `<tr>
+      <td>${esc(areaLabel(a))}</td><td class="r num">${nf0.format(a.rows || 0)}</td><td class="r num">${fCOP(a.total || 0)}</td>
+      <td class="num">${a.minDate || ''} – ${a.maxDate || ''}</td><td>${fWhen(a.updatedAt)}<div class="hint">${esc(a.updatedBy || '')}</div></td>
+      <td class="r num">${usersBy(a.id)}</td>
+      <td class="r"><button type="button" class="btn sm" data-del-area="${esc(a.id)}">Eliminar</button></td></tr>`).join('')
+    || '<tr><td colspan="7" class="hint">Todavía no hay áreas. Carga el reporte contable en la pestaña “Cargar datos”.</td></tr>';
+  $('areasCount').textContent = AREAS.length;
+  renderAreaPicker();
+}
+$('areasBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-del-area]');
+  if (b) twoStep(b, async () => { await deleteArea(b.dataset.delArea); await refreshAreas(); });
+});
+
+/* ---------- usuarios ---------- */
+let editing = null;
+let pickSel = new Set();
+function renderAreaPicker() {
+  const q = $('areaQ').value.trim().toLowerCase();
+  const isAdmin = $('uRole').value === 'admin';
+  $('areaPick').innerHTML = AREAS.map(a => {
+    const t = areaLabel(a);
+    return `<label${q && !t.toLowerCase().includes(q) ? ' hidden' : ''}><input type="checkbox" value="${esc(a.id)}"${pickSel.has(a.id) ? ' checked' : ''}${isAdmin ? ' disabled' : ''}><span>${esc(t)}</span></label>`;
+  }).join('') || '<p class="hint">Primero carga datos para que aparezcan las áreas.</p>';
+  $('areaPickNote').textContent = isAdmin ? 'Los administradores ven todas las áreas.' : `${pickSel.size} área(s) seleccionada(s)`;
+}
+$('areaQ').addEventListener('input', renderAreaPicker);
+$('uRole').addEventListener('change', renderAreaPicker);
+$('areaPick').addEventListener('change', e => { const c = e.target; if (c.type === 'checkbox') { c.checked ? pickSel.add(c.value) : pickSel.delete(c.value); renderAreaPicker(); } });
+$('pickAll').addEventListener('click', () => { $('areaPick').querySelectorAll('label:not([hidden]) input').forEach(c => pickSel.add(c.value)); renderAreaPicker(); });
+$('pickNone').addEventListener('click', () => { pickSel = new Set(); renderAreaPicker(); });
+
+function fillForm(u) {
+  editing = u ? u.id : null;
+  $('uEmail').value = u?.email || u?.id || '';
+  $('uEmail').readOnly = !!u;
+  $('uName').value = u?.name || '';
+  $('uRole').value = u?.role || 'viewer';
+  $('uActive').checked = u ? u.active !== false : true;
+  pickSel = new Set((u?.areas || []).map(String));
+  $('uPass').value = '';
+  $('uPassLbl').textContent = u ? 'Contraseña temporal nueva (opcional)' : 'Contraseña temporal';
+  $('uPassHint').textContent = u ? 'Solo si borraste su cuenta en Firebase → Authentication y necesitas crearle acceso de nuevo.' : 'Se la das al usuario; al entrar por primera vez tendrá que cambiarla.';
+  $('formTitle').textContent = u ? 'Editar usuario' : 'Agregar usuario';
+  $('uMsg').textContent = '';
+  renderAreaPicker();
+}
+$('uNew').addEventListener('click', () => fillForm(null));
+$('uGen').addEventListener('click', () => {
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  const r = crypto.getRandomValues(new Uint32Array(10));
+  $('uPass').value = [...r].map(x => abc[x % abc.length]).join('');
+});
+
+$('userForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = emailKey($('uEmail').value);
+  const say = (t, cls = '') => { $('uMsg').textContent = t; $('uMsg').className = 'form-msg ' + cls; };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('Escribe un correo válido.', 'err');
+  const role = $('uRole').value, active = $('uActive').checked;
+  if (email === me && (role !== 'admin' || !active)) return say('No puedes quitarte el rol de administrador ni desactivarte a ti mismo.', 'err');
+  if (role !== 'admin' && !pickSel.size) return say('Asigna al menos un área.', 'err');
+  if (!editing && USERS.some(u => u.id === email)) return say('Ese correo ya existe. Edítalo desde la lista.', 'err');
+  const pass = $('uPass').value.trim();
+  if (!editing && pass.length < 8) return say('Escribe una contraseña temporal de al menos 8 caracteres (o pulsa Generar).', 'err');
+  if (editing && pass && pass.length < 8) return say('La contraseña temporal debe tener al menos 8 caracteres.', 'err');
+  try {
+    if (pass) {
+      try { await createAccount(email, pass); }
+      catch (err) {
+        if (err.code === 'auth/email-already-in-use') return say(editing
+          ? 'Ese correo ya tiene cuenta de acceso. Para darle una contraseña nueva, bórrala primero en Firebase → Authentication → Usuarios y vuelve a guardar.'
+          : 'Ya existe una cuenta de acceso con ese correo en Firebase. Si no la creaste tú, bórrala en Firebase → Authentication → Usuarios y vuelve a guardar.', 'err');
+        if (err.code === 'auth/operation-not-allowed') return say('Activa “Correo electrónico/contraseña” en Firebase → Authentication → Método de acceso.', 'err');
+        throw err;
+      }
+    }
+    await saveUser({ email, name: $('uName').value, role, areas: role === 'admin' ? [] : [...pickSel], active, mustChangePassword: !!pass }, me);
+    const wasNew = !editing;
+    await refreshUsers();
+    await refreshAreas();
+    if (wasNew) fillForm(null);
+    say(wasNew ? `Usuario ${email} creado con la contraseña temporal ${pass}. Compártesela por un canal privado; al entrar tendrá que cambiarla.` : pass ? `Cambios guardados y acceso creado con la contraseña temporal ${pass}.` : 'Cambios guardados.', 'ok');
+  } catch (err) { say(err.code === 'permission-denied' ? 'Sin permiso para guardar. Revisa las reglas de Firestore.' : err.message, 'err'); }
+});
+
+async function refreshUsers() {
+  USERS = await listUsers();
+  const names = new Map(AREAS.map(a => [a.id, areaLabel(a)]));
+  $('usersBody').innerHTML = USERS.map(u => `<tr>
+      <td>${esc(u.id)}${u.id === me ? ' <span class="tag">tú</span>' : ''}<div class="hint">${esc(u.name || '')}</div></td>
+      <td>${u.role === 'admin' ? '<span class="tag admin">Administrador</span>' : 'Usuario'}</td>
+      <td class="areas-cell">${u.role === 'admin' ? '<span class="hint">Todas</span>' : (u.areas || []).map(id => `<span class="tag" title="${esc(names.get(id) || id)}">${esc(names.get(id) || id + ' (sin datos)')}</span>`).join(' ') || '<span class="warn">Sin áreas</span>'}</td>
+      <td>${u.active === false ? '<span class="tag off">Inactivo</span>' : '<span class="tag on">Activo</span>'}</td>
+      <td class="r nowrap"><button type="button" class="btn sm" data-edit="${esc(u.id)}">Editar</button>${u.id === me ? '' : ` <button type="button" class="btn sm" data-del-user="${esc(u.id)}">Eliminar</button>`}</td></tr>`).join('');
+  $('usersCount').textContent = USERS.length;
+}
+$('usersBody').addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]');
+  if (ed) { fillForm(USERS.find(u => u.id === ed.dataset.edit)); $('userForm').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  const del = e.target.closest('[data-del-user]');
+  if (del) twoStep(del, async () => { await deleteUser(del.dataset.delUser); if (editing === del.dataset.delUser) fillForm(null); await refreshUsers(); });
+});
+
+try {
+  await refreshAreas();
+  await refreshUsers();
+  await refreshAreas(); // cuenta usuarios por área
+  fillForm(null);
+} catch (e) {
+  $('fileInfo').innerHTML = `<span class="err">No se pudieron leer áreas o usuarios: ${esc(e.message)}</span>`;
+}
+
+};
+
+/* ===== arranque: #admin abre la administración (solo admin); lo demás, el tablero ===== */
+window.addEventListener('hashchange', () => location.reload());
+const session = await __m['auth-ui'].requireSession();
+if (location.hash === '#admin' && session.profile.role === 'admin') await __m['admin'](session);
+else { if (location.hash === '#admin') history.replaceState(null, '', location.pathname); await __m['main'](session); }
+
+</script>
+</body>
+</html>
